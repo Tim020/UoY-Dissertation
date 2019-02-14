@@ -44,5 +44,8 @@ class Vehicle(object):
     def set_desired_speed(self, desired_velocity):
         self.desired_velocity = desired_velocity
 
+    def set_lead_vehicle(self, vehicle):
+        self.lead_vehicle = vehicle
+
     def get_safetime_headway(self):
         return 1
