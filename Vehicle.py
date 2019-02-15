@@ -23,13 +23,9 @@ class Vehicle(object):
 
         # Running values
         self.velocity = 0
-        self.prev_velocity = 0
         self.acceleration = 0
-        self.prev_acceleration = 0
         self.position = 0
-        self.prev_position = 0
         self.gap = 0
-        self.prev_gap = 0
         self.lead_vehicle = None
         self.lane = 0
 
@@ -46,11 +42,6 @@ class Vehicle(object):
         self._new_gap = self.model.calc_gap(self)
 
     def update_new_params(self):
-        self.prev_velocity = self.velocity
-        self.prev_acceleration = self.acceleration
-        self.prev_position = self.position
-        self.prev_gap = self.gap
-
         self.velocity = self._new_velocity
         self.acceleration = self._new_acceleration
         self.position = self._new_position
@@ -71,7 +62,6 @@ class Vehicle(object):
     def set_lead_vehicle(self, vehicle):
         self.lead_vehicle = vehicle
         self.gap = self.model.calc_gap(self)
-        self.prev_gap = self.gap
 
     def add_to_road(self, bridge, lead_vehicle):
         self._bridge = bridge
@@ -82,8 +72,6 @@ class Vehicle(object):
         else:
             self.gap = Consts.BRIDGE_LENGTH + 100
             self.velocity = self.desired_velocity
-        self.prev_gap = self.gap
-        self.prev_velocity = self.velocity
 
     def set_lane(self, lane):
         self.lane = lane

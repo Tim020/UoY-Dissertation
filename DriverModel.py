@@ -30,23 +30,23 @@ class IDM(DriverModel):
         """
         dv(t)/dt = [1 - (v(t)/v0)^4  - (s*(t)/s(t))^2]
         """
-        acceleration = math.pow((vehicle.prev_velocity / vehicle.desired_velocity), 4)
-        deceleration = math.pow(IDM.calc_desired_gap(vehicle) / vehicle.prev_gap, 2)
+        acceleration = math.pow((vehicle.velocity / vehicle.desired_velocity), 4)
+        deceleration = math.pow(IDM.calc_desired_gap(vehicle) / vehicle.gap, 2)
         return vehicle.max_acceleration * (1 - acceleration - deceleration)
 
     @staticmethod
     def calc_desired_gap(vehicle):
-        pv = vehicle.prev_velocity
+        pv = vehicle.velocity
         if vehicle.lead_vehicle:
-            lpv = vehicle.lead_vehicle.prev_velocity
+            lpv = vehicle.lead_vehicle.velocity
         else:
             lpv = pv
-        c = ((vehicle.get_safetime_headway() * pv) + ((pv * (pv - lpv)) / (2 * math.sqrt(vehicle.max_acceleration * vehicle.max_deceleration))))
+        c = (vehicle.get_safetime_headway() * pv) + ((pv * (pv - lpv)) / (2 * math.sqrt(vehicle.max_acceleration * vehicle.max_deceleration)))
         return vehicle.minimum_distance + max(0, c)
 
     @staticmethod
     def calc_velocity(vehicle):
-        new_velocity = vehicle.prev_velocity + (IDM.calc_acceleration(vehicle) * Consts.TIME_STEP)
+        new_velocity = vehicle.velocity + (IDM.calc_acceleration(vehicle) * Consts.TIME_STEP)
         if new_velocity < 0:
             new_velocity = 0
         return new_velocity
@@ -54,9 +54,9 @@ class IDM(DriverModel):
     @staticmethod
     def calc_position(vehicle):
         if IDM.calc_velocity(vehicle) < 0:
-            new_position = vehicle.prev_position - 0.5 * (math.pow(vehicle.prev_velocity, 2) / IDM.calc_acceleration(vehicle))
+            new_position = vehicle.position - (0.5 * (math.pow(vehicle.velocity, 2) / IDM.calc_acceleration(vehicle)))
         else:
-            new_position = vehicle.prev_position + vehicle.prev_velocity * Consts.TIME_STEP + (0.5 * IDM.calc_acceleration(vehicle) * math.pow(Consts.TIME_STEP, 2))
+            new_position = vehicle.position + (vehicle.velocity * Consts.TIME_STEP) + (0.5 * IDM.calc_acceleration(vehicle) * math.pow(Consts.TIME_STEP, 2))
         return new_position
 
     @staticmethod
