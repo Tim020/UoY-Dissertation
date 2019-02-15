@@ -3,6 +3,7 @@
 from decimal import *
 import simpy
 import sys
+import time
 
 import Bridge
 import Consts
@@ -21,6 +22,7 @@ class Simulation(object):
         self._vehicle_count = Decimal(0)
         self._next_vehicle_in = Decimal(0)
         self._vehicle_failures = 0
+        self._vehicles_per_hour = 0
 
     def update(self, frequency, time_step):
         while True:
@@ -38,6 +40,10 @@ class Simulation(object):
                 self._next_vehicle_in = self._vehicle_timer
             else:
                 self._next_vehicle_in -= Decimal(time_step)
+
+            self._vehicles_per_hour = int((simulation._vehicle_count / Decimal(
+                simulation.simulated_time)) * 3600)
+
             self.bridge.update()
 
             yield self.env.timeout(frequency)
@@ -54,16 +60,20 @@ if __name__ == '__main__':
     environment = simpy.RealtimeEnvironment()
     simulation = Simulation(environment)
     total_sim_time = Consts.SIMULATION_LENGTH * (Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
+    start_time = time.time()
     environment.run(until=total_sim_time)
+    end_time = time.time()
 
-    print(
-        'Simulation Finished. Simulated {} seconds and {} vehicles, '
-        '[bridge] {} calls, {} cars, {} trucks, [garage] {} cars, {} trucks '
-        'and {} inflow failures'.format(simulation.simulated_time,
-                                        simulation._vehicle_count,
-                                        simulation.bridge._calls,
-                                        simulation.bridge._cars,
-                                        simulation.bridge._trucks,
-                                        simulation.garage._cars,
-                                        simulation.garage._trucks,
-                                        simulation._vehicle_failures))
+    print('Simulation finished after {} seconds.'.
+          format(int(end_time - start_time)))
+
+    print('\tSimulated {} seconds and {} vehicles, {} veh/h'.
+          format(int(simulation.simulated_time), simulation._vehicle_count,
+                 simulation._vehicles_per_hour))
+
+    print('\t[Bridge] {} calls, {} cars, {} trucks, {} inflow failures'.
+          format(simulation.bridge._calls, simulation.bridge._cars,
+                 simulation.bridge._trucks, simulation._vehicle_failures))
+
+    print('\t[Garage] {} cars, {} trucks '.format(simulation.garage._cars,
+                                                  simulation.garage._trucks))
