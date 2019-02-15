@@ -20,6 +20,7 @@ class Simulation(object):
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)
         self._vehicle_count = Decimal(0)
         self._next_vehicle_in = Decimal(0)
+        self._vehicle_failures = 0
 
     def update(self, frequency, time_step):
         while True:
@@ -32,6 +33,7 @@ class Simulation(object):
                     self._vehicle_count += 1
                 else:
                     # print('Could not add new vehicle at this time')
+                    self._vehicle_failures += 1
                     pass
                 self._next_vehicle_in = self._vehicle_timer
             else:
@@ -56,9 +58,12 @@ if __name__ == '__main__':
 
     print(
         'Simulation Finished. Simulated {} seconds and {} vehicles, '
-        '[bridge] {} calls, {} cars, {} trucks, [garage] {} cars and '
-        '{} trucks'.format(simulation.simulated_time,
-                           simulation._vehicle_count,
-                           simulation.bridge._calls, simulation.bridge._cars,
-                           simulation.bridge._trucks, simulation.garage._cars,
-                           simulation.garage._trucks))
+        '[bridge] {} calls, {} cars, {} trucks, [garage] {} cars, {} trucks '
+        'and {} inflow failures'.format(simulation.simulated_time,
+                                        simulation._vehicle_count,
+                                        simulation.bridge._calls,
+                                        simulation.bridge._cars,
+                                        simulation.bridge._trucks,
+                                        simulation.garage._cars,
+                                        simulation.garage._trucks,
+                                        simulation._vehicle_failures))
