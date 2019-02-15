@@ -1,19 +1,22 @@
 from faker import Faker
 
-from Simulation import SIMULATION_SEED
+import Consts
 
 uuid_generator = Faker()
-uuid_generator.seed(SIMULATION_SEED)
+uuid_generator.seed(Consts.SIMULATION_SEED)
 
 
 class Vehicle(object):
-    def __init__(self, desired_velocity, max_acceleration, max_deceleration, length, model):
+    def __init__(self, desired_velocity, max_acceleration, max_deceleration,
+                 minimum_distance, length, model):
         self._id = uuid_generator.uuid4()
+        self._label = 'Base'
 
         # Paramaters from the driver model
         self.desired_velocity = desired_velocity
         self.max_acceleration = max_acceleration
         self.max_deceleration = max_deceleration
+        self.minimum_distance = minimum_distance
         self.length = length
         self.model = model
 
@@ -27,6 +30,7 @@ class Vehicle(object):
         self.gap = 0
         self.prev_gap = 0
         self.lead_vehicle = None
+        self.lane = 0
 
         # Update values
         self._new_acceleration = None
@@ -51,7 +55,10 @@ class Vehicle(object):
         self.position = self._new_position
         self.gap = self._new_gap
 
-        print('{}: Position: {}, Velocity: {} m/s'.format(self._id, self.position, self.velocity))
+        # print('{}|{}: Lane: {}, '
+        #       'Position: {}, Velocity: {}'.format(self._label, self._id,
+        #                                           self.lane, self.position,
+        #                                           self.velocity))
 
     def set_desired_speed(self, desired_velocity):
         self.desired_velocity = desired_velocity
@@ -61,5 +68,35 @@ class Vehicle(object):
         self.gap = self.model.calc_gap(self)
         self.prev_gap = self.gap
 
+    def add_to_road(self, lead_vehicle):
+        self.lead_vehicle = lead_vehicle
+        if lead_vehicle:
+            self.gap = self.lead_vehicle.position - self.lead_vehicle.length
+            self.velocity = lead_vehicle.velocity
+        else:
+            self.gap = Consts.BRIDGE_LENGTH + 100
+            self.velocity = self.desired_velocity
+        self.prev_gap = self.gap
+        self.prev_velocity = self.velocity
+
+    def set_lane(self, lane):
+        self.lane = lane
+
     def get_safetime_headway(self):
         return 1
+
+
+class Car(Vehicle):
+    def __init__(self, desired_velocity, max_acceleration, max_deceleration,
+                 minimum_distance, length, model):
+        super().__init__(desired_velocity, max_acceleration, max_deceleration,
+                         minimum_distance, length, model)
+        self._label = 'Car'
+
+
+class Truck(Vehicle):
+    def __init__(self, desired_velocity, max_acceleration, max_deceleration,
+                 minimum_distance, length, model):
+        super().__init__(desired_velocity, max_acceleration, max_deceleration,
+                         minimum_distance, length, model)
+        self._label = 'Truck'

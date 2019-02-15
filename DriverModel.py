@@ -1,7 +1,7 @@
 import math
 
 
-from Simulation import TIME_STEP, MINUMUM_GAP, BRIDGE_LENGTH
+import Consts
 
 
 class DriverModel(object):
@@ -42,11 +42,11 @@ class IDM(DriverModel):
         else:
             lpv = pv
         c = ((vehicle.get_safetime_headway() * pv) + ((pv * (pv - lpv)) / (2 * math.sqrt(vehicle.max_acceleration * vehicle.max_deceleration))))
-        return MINUMUM_GAP + max(0, c)
+        return vehicle.minimum_distance + max(0, c)
 
     @staticmethod
     def calc_velocity(vehicle):
-        new_velocity = vehicle.prev_velocity + (IDM.calc_acceleration(vehicle) * TIME_STEP)
+        new_velocity = vehicle.prev_velocity + (IDM.calc_acceleration(vehicle) * Consts.TIME_STEP)
         if new_velocity < 0:
             new_velocity = 0
         return new_velocity
@@ -56,7 +56,7 @@ class IDM(DriverModel):
         if IDM.calc_velocity(vehicle) < 0:
             new_position = vehicle.prev_position - 0.5 * (math.pow(vehicle.prev_velocity, 2) / IDM.calc_acceleration(vehicle))
         else:
-            new_position = vehicle.prev_position + vehicle.prev_velocity * TIME_STEP + (0.5 * IDM.calc_acceleration(vehicle) * math.pow(TIME_STEP, 2))
+            new_position = vehicle.prev_position + vehicle.prev_velocity * Consts.TIME_STEP + (0.5 * IDM.calc_acceleration(vehicle) * math.pow(Consts.TIME_STEP, 2))
         return new_position
 
     @staticmethod
@@ -64,4 +64,4 @@ class IDM(DriverModel):
         if vehicle.lead_vehicle:
             return vehicle.lead_vehicle.position - IDM.calc_position(vehicle) - vehicle.lead_vehicle.length
         else:
-            return BRIDGE_LENGTH + 100
+            return Consts.BRIDGE_LENGTH + 100
