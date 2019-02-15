@@ -51,6 +51,8 @@ class Vehicle(object):
         self.position = self.new_position
         self.gap = self.new_gap
 
+        print('{}: Position: {}, Velocity: {} m/s'.format(self._id, self.position, self.velocity))
+
     def set_desired_speed(self, desired_velocity):
         self.desired_velocity = desired_velocity
 

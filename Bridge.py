@@ -1,4 +1,6 @@
 from Simulation import SIMULATION_FREQUENCY, TIME_STEP
+from Vehicle import Vehicle
+from DriverModel import IDM
 
 
 class Bridge(object):
@@ -10,6 +12,8 @@ class Bridge(object):
         self.action = env.process(self.update(SIMULATION_FREQUENCY, TIME_STEP))
         self.simulated_time = 0
 
+        self.add_vehicle(Vehicle(22, 2, 3, 2, IDM), 0)
+
     def add_vehicle(self, vehicle, lane):
         lead_vehicle = self.vehicles[lane][0] if self.vehicles[lane] else None
         vehicle.set_lead_vehicle(lead_vehicle)
@@ -17,7 +21,14 @@ class Bridge(object):
 
     def update(self, frequency, time_step):
         while True:
-            print('Update at {}, simulated time: {}s'.format(self.env.now,
-                                                             self.simulated_time))
+            print('Update at {}, simulated time: {}s'.format(self.env.now, self.simulated_time))
+
+            for lane in self.vehicles:
+                for vehicle in lane:
+                    vehicle.calc_new_params()
+            for lane in self.vehicles:
+                for vehicle in lane:
+                    vehicle.update_new_params()
+
             self.simulated_time += time_step
             yield self.env.timeout(frequency)
