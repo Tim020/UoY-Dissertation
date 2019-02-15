@@ -55,6 +55,10 @@ class Vehicle(object):
         self.position = self._new_position
         self.gap = self._new_gap
 
+        assert(self.velocity >= 0)
+        if self.lead_vehicle:
+            assert(self.lead_vehicle.position > self.position)
+
         # print('{}|{}: Lane: {}, '
         #       'Position: {}, Velocity: {}'.format(self._label, self._id,
         #                                           self.lane, self.position,
