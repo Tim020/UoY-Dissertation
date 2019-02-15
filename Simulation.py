@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import random
 import simpy
 
 import Bridge
@@ -23,12 +24,12 @@ MINUMUM_GAP = 2
 # Length of the bridge for the simulation
 BRIDGE_LENGTH = 200
 
-
-def get_bridge_length():
-    return bridge.length
+# Seed used in this simulation - used to generate IDs of various things
+SIMULATION_SEED = random.getrandbits(128)
 
 
 if __name__ == '__main__':
+    print('Starting simulation with seed: {}'.format(SIMULATION_SEED))
     environment = simpy.RealtimeEnvironment()
     bridge = Bridge.Bridge(environment, BRIDGE_LENGTH, 1)
     total_sim_time = SIMULATION_LENGTH * (SIMULATION_FREQUENCY / TIME_STEP)

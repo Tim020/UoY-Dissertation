@@ -1,5 +1,15 @@
+from faker import Faker
+
+from Simulation import SIMULATION_SEED
+
+uuid_generator = Faker()
+uuid_generator.seed(SIMULATION_SEED)
+
+
 class Vehicle(object):
     def __init__(self, desired_velocity, max_acceleration, max_deceleration, length, model):
+        self._id = uuid_generator.uuid4()
+
         # Paramaters from the driver model
         self.desired_velocity = desired_velocity
         self.max_acceleration = max_acceleration
