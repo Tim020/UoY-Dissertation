@@ -20,6 +20,13 @@ TRUCK_PCT = 20
 # Minimum distance to enforce between vehicles
 MINUMUM_GAP = 2
 
+bridge = None
+
+
+def get_bridge_length():
+    return bridge.length
+
+
 if __name__ == '__main__':
     environment = simpy.RealtimeEnvironment()
     bridge = Bridge.Bridge(environment, 100, 1)
