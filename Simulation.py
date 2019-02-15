@@ -20,7 +20,8 @@ TRUCK_PCT = 20
 # Minimum distance to enforce between vehicles
 MINUMUM_GAP = 2
 
-bridge = None
+# Length of the bridge for the simulation
+BRIDGE_LENGTH = 200
 
 
 def get_bridge_length():
@@ -29,6 +30,6 @@ def get_bridge_length():
 
 if __name__ == '__main__':
     environment = simpy.RealtimeEnvironment()
-    bridge = Bridge.Bridge(environment, 100, 1)
+    bridge = Bridge.Bridge(environment, BRIDGE_LENGTH, 1)
     total_sim_time = SIMULATION_LENGTH * (SIMULATION_FREQUENCY / TIME_STEP)
     environment.run(until=total_sim_time)

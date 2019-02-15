@@ -1,7 +1,7 @@
 import math
 
 
-from Simulation import TIME_STEP, MINUMUM_GAP, get_bridge_length
+from Simulation import TIME_STEP, MINUMUM_GAP, BRIDGE_LENGTH
 
 
 class DriverModel(object):
@@ -30,9 +30,9 @@ class IDM(DriverModel):
         """
         dv(t)/dt = [1 - (v(t)/v0)^4  - (s*(t)/s(t))^2]
         """
-        acceleration = 1 - math.pow((vehicle.prev_velocity / vehicle.desired_velocity), 4)
-        deceleration = math.pow(IDM.calc_desired_gap(vehicle), 2)
-        return vehicle.acceleration * (acceleration - deceleration)
+        acceleration = math.pow((vehicle.prev_velocity / vehicle.desired_velocity), 4)
+        deceleration = math.pow(IDM.calc_desired_gap(vehicle) / vehicle.prev_gap, 2)
+        return vehicle.max_acceleration * (1 - acceleration - deceleration)
 
     @staticmethod
     def calc_desired_gap(vehicle):
@@ -41,7 +41,7 @@ class IDM(DriverModel):
             lpv = vehicle.lead_vehicle.prev_velocity
         else:
             lpv = pv
-        c = ((vehicle.get_safetime_headway() * pv) + ((pv * (lpv - pv)) / math.sqrt(2 * vehicle.max_acceleration * vehicle.max_deceleration)))
+        c = ((vehicle.get_safetime_headway() * pv) + ((pv * (pv - lpv)) / (2 * math.sqrt(vehicle.max_acceleration * vehicle.max_deceleration))))
         return MINUMUM_GAP + max(0, c)
 
     @staticmethod
@@ -64,4 +64,4 @@ class IDM(DriverModel):
         if vehicle.lead_vehicle:
             return vehicle.lead_vehicle.position - IDM.calc_position(vehicle) - vehicle.lead_vehicle.length
         else:
-            return get_bridge_length() + 100
+            return BRIDGE_LENGTH + 100

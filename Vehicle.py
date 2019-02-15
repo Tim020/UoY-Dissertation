@@ -46,6 +46,8 @@ class Vehicle(object):
 
     def set_lead_vehicle(self, vehicle):
         self.lead_vehicle = vehicle
+        self.gap = self.model.calc_gap(self)
+        self.prev_gap = self.gap
 
     def get_safetime_headway(self):
         return 1
