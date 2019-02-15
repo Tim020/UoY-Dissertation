@@ -29,16 +29,16 @@ class Vehicle(object):
         self.lead_vehicle = None
 
         # Update values
-        self.new_acceleration = None
-        self.new_velocity = None
-        self.new_position = None
-        self.new_gap = None
+        self._new_acceleration = None
+        self._new_velocity = None
+        self._new_position = None
+        self._new_gap = None
 
     def calc_new_params(self):
-        self.new_acceleration = self.model.calc_acceleration(self)
-        self.new_velocity = self.model.calc_velocity(self)
-        self.new_position = self.model.calc_position(self)
-        self.new_gap = self.model.calc_gap(self)
+        self._new_acceleration = self.model.calc_acceleration(self)
+        self._new_velocity = self.model.calc_velocity(self)
+        self._new_position = self.model.calc_position(self)
+        self._new_gap = self.model.calc_gap(self)
 
     def update_new_params(self):
         self.prev_velocity = self.velocity
@@ -46,10 +46,10 @@ class Vehicle(object):
         self.prev_position = self.position
         self.prev_gap = self.gap
 
-        self.velocity = self.new_velocity
-        self.acceleration = self.new_acceleration
-        self.position = self.new_position
-        self.gap = self.new_gap
+        self.velocity = self._new_velocity
+        self.acceleration = self._new_acceleration
+        self.position = self._new_position
+        self.gap = self._new_gap
 
         print('{}: Position: {}, Velocity: {} m/s'.format(self._id, self.position, self.velocity))
 
