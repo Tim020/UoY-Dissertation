@@ -15,7 +15,7 @@ class Bridge(object):
         self.add_vehicle(Vehicle(22, 2, 3, 2, IDM), 0)
 
     def add_vehicle(self, vehicle, lane):
-        lead_vehicle = self.vehicles[lane][0] if self.vehicles[lane] else None
+        lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
         vehicle.set_lead_vehicle(lead_vehicle)
         self.vehicles[lane].append(vehicle)
 
