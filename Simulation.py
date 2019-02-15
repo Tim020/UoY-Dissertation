@@ -28,9 +28,27 @@ BRIDGE_LENGTH = 200
 SIMULATION_SEED = random.getrandbits(128)
 
 
+class Simulation(object):
+    def __init__(self, env):
+        self.env = env
+        self.simulated_time = 0
+        self.action = env.process(self.update(SIMULATION_FREQUENCY, TIME_STEP))
+        self.bridge = Bridge.Bridge(BRIDGE_LENGTH, 1)
+
+    def update(self, frequency, time_step):
+        while True:
+            print('Update at {}, simulated time: {}s'.format(self.env.now,
+                                                             self.simulated_time))
+
+            self.bridge.update()
+
+            self.simulated_time += time_step
+            yield self.env.timeout(frequency)
+
+
 if __name__ == '__main__':
     print('Starting simulation with seed: {}'.format(SIMULATION_SEED))
     environment = simpy.RealtimeEnvironment()
-    bridge = Bridge.Bridge(environment, BRIDGE_LENGTH, 1)
+    simulation = Simulation(environment)
     total_sim_time = SIMULATION_LENGTH * (SIMULATION_FREQUENCY / TIME_STEP)
     environment.run(until=total_sim_time)
