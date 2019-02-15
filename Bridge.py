@@ -23,12 +23,33 @@ class Bridge(object):
         while True:
             print('Update at {}, simulated time: {}s'.format(self.env.now, self.simulated_time))
 
+            # Step 1: Parallel calculate new parameters for all vehicles
             for lane in self.vehicles:
                 for vehicle in lane:
                     vehicle.calc_new_params()
+
+            # Step 2: Parallel update new parameters for all vehicles
             for lane in self.vehicles:
                 for vehicle in lane:
                     vehicle.update_new_params()
+
+            # Step 3: Remove any vehicle at the end of the bridge
+            vehicles_to_remove = [[] for _ in range(self.lanes * 2)]
+            for i, lane in enumerate(self.vehicles):
+                for vehicle in lane:
+                    if vehicle.position > self.length:
+                        vehicles_to_remove[i].append(vehicle)
+            for i, lane in enumerate(vehicles_to_remove):
+                for vehicle in lane:
+                    self.vehicles[i].remove(vehicle)
+
+            # Step 4: Update lead vehicles for all remaining vehicles
+            for lane in self.vehicles:
+                for i, vehicle in enumerate(lane):
+                    if i == 0:
+                        vehicle.set_lead_vehicle(None)
+                    else:
+                        vehicle.set_lead_vehicle(lane[i - 1])
 
             self.simulated_time += time_step
             yield self.env.timeout(frequency)
