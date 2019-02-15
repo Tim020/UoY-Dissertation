@@ -3,10 +3,19 @@ import random
 import Vehicle
 
 
+class SafetimeHeadwayZone(object):
+    def __init__(self, start, end, time):
+        self.start = start
+        self.end = end
+        self.time = time
+
+
 class Bridge(object):
-    def __init__(self, seed, length, lanes):
+    def __init__(self, seed, length, lanes, safetime_headway):
         self.length = length
         self.lanes = lanes
+        self.safetime_headway = safetime_headway
+        self.headway_zones = [[] for _ in range(self.lanes * 2)]
         self.vehicles = [[] for _ in range(self.lanes * 2)]
         self._random = random.Random(seed)
         self._calls = 0
@@ -34,8 +43,38 @@ class Bridge(object):
             self._add_vehicle(vehicle, lead_vehicle, lane)
             return True
 
+    def add_safetime_headway_zone_all_lanes(self, start, end, time):
+        for i in range(self.lanes * 2):
+            lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
+            if lane < 0:
+                start = self.length - end
+                end = self.length - start
+            self.add_safetime_headway_zone(start, end, time, lane)
+
+    def add_safetime_headway_zone(self, start, end, time, lane):
+        if self.headway_zones[lane]:
+            can_add_zone = True
+            for zone in self.headway_zones[lane]:
+                if start < zone.end and start > zone.start:
+                    can_add_zone = False
+                    break
+            if can_add_zone:
+                self.headway_zones[lane].append(SafetimeHeadwayZone(start, end, time))
+        else:
+            self.headway_zones[lane].append(SafetimeHeadwayZone(start, end, time))
+
+    def get_safetime_headway(self, lane, position):
+        if self.headway_zones[lane]:
+            for zone in self.headway_zones[lane]:
+                if zone.end > position >= zone.start:
+                    p = ((position - zone.start) / (zone.end - zone.start))
+                    return zone.time * p
+            return self.safetime_headway
+        else:
+            return self.safetime_headway
+
     def _add_vehicle(self, vehicle, lead_vehicle, lane):
-        vehicle.add_to_road(lead_vehicle)
+        vehicle.add_to_road(self, lead_vehicle)
         vehicle.set_lane(lane)
         self.vehicles[lane].append(vehicle)
         if type(vehicle) == Vehicle.Car:

@@ -15,7 +15,7 @@ class Simulation(object):
         self.env = env
         self.simulated_time = 0
         self.action = env.process(self.update(Consts.SIMULATION_FREQUENCY, Consts.TIME_STEP))
-        self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED, Consts.BRIDGE_LENGTH, 1)
+        self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED, Consts.BRIDGE_LENGTH, 1, 1)
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SHORT_SEED, Consts.CAR_PCT, Consts.TRUCK_PCT, 33, 22)
         self.vps = Decimal(Consts.INFLOW_RATE / 60 / 60)
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)

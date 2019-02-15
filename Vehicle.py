@@ -11,6 +11,7 @@ class Vehicle(object):
                  minimum_distance, length, model):
         self._id = uuid_generator.uuid4()
         self._label = 'Base'
+        self._bridge = None
 
         # Paramaters from the driver model
         self.desired_velocity = desired_velocity
@@ -72,7 +73,8 @@ class Vehicle(object):
         self.gap = self.model.calc_gap(self)
         self.prev_gap = self.gap
 
-    def add_to_road(self, lead_vehicle):
+    def add_to_road(self, bridge, lead_vehicle):
+        self._bridge = bridge
         self.lead_vehicle = lead_vehicle
         if lead_vehicle:
             self.gap = self.lead_vehicle.position - self.lead_vehicle.length
@@ -87,7 +89,7 @@ class Vehicle(object):
         self.lane = lane
 
     def get_safetime_headway(self):
-        return 1
+        return self._bridge.get_safetime_headway(self.lane, self.position)
 
 
 class Car(Vehicle):
