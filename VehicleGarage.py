@@ -1,5 +1,5 @@
-import random
 import numpy as np
+import random
 import scipy.stats as stats
 
 from DriverModel import IDM

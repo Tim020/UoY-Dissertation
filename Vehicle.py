@@ -1,4 +1,5 @@
 from faker import Faker
+import os
 
 import Consts
 
@@ -35,6 +36,8 @@ class Vehicle(object):
         self._new_position = None
         self._new_gap = None
 
+        self._file = None
+
     def calc_new_params(self):
         self._new_acceleration = self.model.calc_acceleration(self)
         self._new_velocity = self.model.calc_velocity(self)
@@ -50,6 +53,8 @@ class Vehicle(object):
         assert(self.velocity >= 0)
         if self.lead_vehicle:
             assert(self.lead_vehicle.position > self.position)
+
+        self._file.write('{},{},{}\n'.format(self.velocity, self.position, self.gap))
 
         # print('{}|{}: Lane: {}, '
         #       'Position: {}, Velocity: {}'.format(self._label, self._id,
@@ -72,12 +77,17 @@ class Vehicle(object):
         else:
             self.gap = Consts.BRIDGE_LENGTH + 100
             self.velocity = self.desired_velocity
+        os.makedirs('debug/lane_{}'.format(self.lane), exist_ok=True)
+        self._file = open('debug/lane_{}/{}.txt'.format(self.lane, self._id), 'w')
 
     def set_lane(self, lane):
         self.lane = lane
 
     def get_safetime_headway(self):
         return self._bridge.get_safetime_headway(self.lane, self.position)
+
+    def finalise(self):
+        self._file.close()
 
 
 class Car(Vehicle):

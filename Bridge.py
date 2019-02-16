@@ -1,3 +1,4 @@
+import os
 import random
 
 import Vehicle
@@ -21,6 +22,8 @@ class Bridge(object):
         self._calls = 0
         self._cars = 0
         self._trucks = 0
+        os.makedirs('debug/bridge', exist_ok=True)
+        self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane), 'w') for lane in range(self.lanes * 2)]
 
     def add_vehicle(self, vehicle):
         self._calls += 1
@@ -74,13 +77,14 @@ class Bridge(object):
             return self.safetime_headway
 
     def _add_vehicle(self, vehicle, lead_vehicle, lane):
-        vehicle.add_to_road(self, lead_vehicle)
         vehicle.set_lane(lane)
+        vehicle.add_to_road(self, lead_vehicle)
         self.vehicles[lane].append(vehicle)
         if type(vehicle) == Vehicle.Car:
             self._cars += 1
         else:
             self._trucks += 1
+        self._lane_files[lane].write('{}\n'.format(vehicle._id))
 
     def update(self):
         # Step 1: Parallel calculate new parameters for all vehicles
@@ -101,6 +105,7 @@ class Bridge(object):
                     vehicles_to_remove[i].append(vehicle)
         for i, lane in enumerate(vehicles_to_remove):
             for vehicle in lane:
+                vehicle.finalise()
                 self.vehicles[i].remove(vehicle)
 
         # Step 4: Update lead vehicles for all remaining vehicles

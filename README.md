@@ -1,5 +1,6 @@
 TODO:
 
+* fix vehicle uuid seeding
 * jam distance distribution
 * uniform distributions
 * variable vehicle lengths - set by user + some variance for funsies

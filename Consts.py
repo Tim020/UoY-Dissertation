@@ -1,10 +1,10 @@
 import random
 
 # How often the simulation updates
-SIMULATION_FREQUENCY = 0.01
+SIMULATION_FREQUENCY = 0.001
 
 # Length of simulation in seconds
-SIMULATION_LENGTH = 120
+SIMULATION_LENGTH = 1300
 
 # Simulation time step in seconds
 TIME_STEP = 0.1
