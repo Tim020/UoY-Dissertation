@@ -17,7 +17,7 @@ class Simulation(object):
         self.action = env.process(self.update(Consts.SIMULATION_FREQUENCY, Consts.TIME_STEP))
         self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED, Consts.BRIDGE_LENGTH, 1, 1)
         # self.bridge.add_safetime_headway_zone_all_lanes(65, 80, 5)
-        self.garage = VehicleGarage.Garage(Consts.SIMULATION_SHORT_SEED, Consts.CAR_PCT, Consts.TRUCK_PCT, 33, 22)
+        self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED, Consts.SIMULATION_SHORT_SEED, Consts.CAR_PCT, Consts.TRUCK_PCT, 33, 22)
         self.vps = Decimal(Consts.INFLOW_RATE / 60 / 60)
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)
         self._vehicle_count = Decimal(0)

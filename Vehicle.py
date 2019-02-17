@@ -1,16 +1,12 @@
-from faker import Faker
 import os
 
 import Consts
 
-uuid_generator = Faker()
-uuid_generator.seed(Consts.SIMULATION_SEED)
-
 
 class Vehicle(object):
-    def __init__(self, desired_velocity, max_acceleration, max_deceleration,
+    def __init__(self, _id, desired_velocity, max_acceleration, max_deceleration,
                  minimum_distance, length, model):
-        self._id = uuid_generator.uuid4()
+        self._id = _id
         self._label = 'Base'
         self._bridge = None
 
@@ -89,18 +85,22 @@ class Vehicle(object):
     def finalise(self):
         self._file.close()
 
+    def __str__(self):
+        return '{}({}, {})'.format(self._label, self._id,
+                                   self.desired_velocity)
+
 
 class Car(Vehicle):
-    def __init__(self, desired_velocity, max_acceleration, max_deceleration,
-                 minimum_distance, length, model):
-        super().__init__(desired_velocity, max_acceleration, max_deceleration,
-                         minimum_distance, length, model)
+    def __init__(self, _id, desired_velocity, max_acceleration,
+                 max_deceleration, minimum_distance, length, model):
+        super().__init__(_id, desired_velocity, max_acceleration,
+                         max_deceleration, minimum_distance, length, model)
         self._label = 'Car'
 
 
 class Truck(Vehicle):
-    def __init__(self, desired_velocity, max_acceleration, max_deceleration,
-                 minimum_distance, length, model):
-        super().__init__(desired_velocity, max_acceleration, max_deceleration,
-                         minimum_distance, length, model)
+    def __init__(self, _id, desired_velocity, max_acceleration,
+                 max_deceleration, minimum_distance, length, model):
+        super().__init__(_id, desired_velocity, max_acceleration,
+                         max_deceleration, minimum_distance, length, model)
         self._label = 'Truck'
