@@ -42,16 +42,15 @@ class Garage(object):
     def new_vehicle(self):
         if self._random.randint(0, 99) < self._car_pct:
             vel = float(self._car_velocities.rvs(1)[0])
-            new_vehicle = Car(self._uuid_generator.uuid4(), vel, 2, 3, 2, 2,
-                              IDM)
+            new_vehicle = Car(self._uuid_generator.uuid4(), vel, 0.73, 1.67,
+                              2, 4, IDM, 2000)
             self._cars += 1
         else:
             vel = float(self._truck_velocities.rvs(1)[0])
-            new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 1, 2, 2, 4,
-                                IDM)
+            new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 0.73, 1.67,
+                                2, 12, IDM, 44000)
             self._trucks += 1
 
         if Consts.DEBUG_MODE:
-            self._debug_file.write('{}\n'.format(new_vehicle.__str__()))
             self._debug_file.write('{}\n'.format(new_vehicle.__str__()))
         return new_vehicle

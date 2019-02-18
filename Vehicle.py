@@ -5,18 +5,20 @@ import Consts
 
 class Vehicle(object):
     def __init__(self, _id, desired_velocity, max_acceleration,
-                 max_deceleration, minimum_distance, length, model):
-        self._id = _id
-        self._label = 'Base'
-        self._bridge = None
-
+                 max_deceleration, minimum_distance, length, model, weight):
         # Paramaters from the driver model
         self.desired_velocity = desired_velocity
         self.max_acceleration = max_acceleration
         self.max_deceleration = max_deceleration
         self.minimum_distance = minimum_distance
         self.length = length
+
+        # Other parameters
+        self._id = _id
+        self._label = 'Base'
+        self._bridge = None
         self.model = model
+        self.weight = weight
 
         # Running values
         self.velocity = 0
@@ -97,15 +99,17 @@ class Vehicle(object):
 
 class Car(Vehicle):
     def __init__(self, _id, desired_velocity, max_acceleration,
-                 max_deceleration, minimum_distance, length, model):
+                 max_deceleration, minimum_distance, length, model, weight):
         super().__init__(_id, desired_velocity, max_acceleration,
-                         max_deceleration, minimum_distance, length, model)
+                         max_deceleration, minimum_distance, length, model,
+                         weight)
         self._label = 'Car'
 
 
 class Truck(Vehicle):
     def __init__(self, _id, desired_velocity, max_acceleration,
-                 max_deceleration, minimum_distance, length, model):
+                 max_deceleration, minimum_distance, length, model, weight):
         super().__init__(_id, desired_velocity, max_acceleration,
-                         max_deceleration, minimum_distance, length, model)
+                         max_deceleration, minimum_distance, length, model,
+                         weight)
         self._label = 'Truck'
