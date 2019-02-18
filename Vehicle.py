@@ -42,7 +42,7 @@ class Vehicle(object):
         self._new_position = self.model.calc_position(self)
         self._new_gap = self.model.calc_gap(self)
 
-    def update_new_params(self):
+    def update_new_params(self, simulated_time):
         self.velocity = self._new_velocity
         self.acceleration = self._new_acceleration
         self.position = self._new_position
@@ -53,8 +53,9 @@ class Vehicle(object):
             assert(self.lead_vehicle.position > self.position)
 
         if Consts.DEBUG_MODE:
-            self._file.write('{},{},{}\n'.format(self.velocity, self.position,
-                                                 self.gap))
+            self._file.write('{},{},{},{}\n'.format(simulated_time,
+                                                    self.velocity,
+                                                    self.position, self.gap))
 
         # print('{}|{}: Lane: {}, '
         #       'Position: {}, Velocity: {}'.format(self._label, self._id,

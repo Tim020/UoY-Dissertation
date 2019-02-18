@@ -1,12 +1,12 @@
 import random
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 # How often the simulation updates
 SIMULATION_FREQUENCY = 0.001
 
 # Length of simulation in seconds
-SIMULATION_LENGTH = 1300
+SIMULATION_LENGTH = 3600
 
 # Simulation time step in seconds
 TIME_STEP = 0.1

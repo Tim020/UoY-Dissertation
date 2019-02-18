@@ -17,8 +17,11 @@ class Bridge(object):
         self.length = length
         self.lanes = lanes
         self.safetime_headway = safetime_headway
-        self.headway_zones = [[] for _ in range(self.lanes * 2)]
-        self.vehicles = [[] for _ in range(self.lanes * 2)]
+        self.vehicles = []
+        self.headway_zones = []
+        for i in range(self.lanes * 2):
+            self.headway_zones.append([])
+            self.vehicles.append([])
         self._random = random.Random(seed)
         self._calls = 0
         self._cars = 0
@@ -95,7 +98,7 @@ class Bridge(object):
         if Consts.DEBUG_MODE:
             self._lane_files[lane].write('{}\n'.format(vehicle._id))
 
-    def update(self):
+    def update(self, simulated_time):
         # Step 1: Parallel calculate new parameters for all vehicles
         for lane in self.vehicles:
             for vehicle in lane:
@@ -104,7 +107,7 @@ class Bridge(object):
         # Step 2: Parallel update new parameters for all vehicles
         for lane in self.vehicles:
             for vehicle in lane:
-                vehicle.update_new_params()
+                vehicle.update_new_params(simulated_time)
 
         # Step 3: Remove any vehicle at the end of the bridge
         vehicles_to_remove = [[] for _ in range(self.lanes * 2)]

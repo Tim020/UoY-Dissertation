@@ -26,7 +26,6 @@ class Simulation(object):
                                            Consts.CAR_PCT, Consts.TRUCK_PCT,
                                            33, 22, Consts.CAR_SPEED_VARIANCE,
                                            Consts.TRUCK_SPEED_VARIANCE)
-        self.vps = Decimal(Consts.INFLOW_RATE / 60 / 60)
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)
         self._vehicle_count = Decimal(0)
         self._next_vehicle_in = Decimal(0)
@@ -54,7 +53,7 @@ class Simulation(object):
             self._vehicles_per_hour = int((simulation._vehicle_count / Decimal(
                 simulation.simulated_time)) * 3600)
 
-            self.bridge.update()
+            self.bridge.update(self.simulated_time)
 
             yield self.env.timeout(frequency)
 
