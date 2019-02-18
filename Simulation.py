@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from decimal import *
+import os
+import shutil
 import simpy
 import sys
 import time
@@ -58,6 +60,9 @@ class Simulation(object):
 
 
 if __name__ == '__main__':
+    if os.path.isdir('debug'):
+        print('Removing old debug files')
+        shutil.rmtree('debug')
     # If there is an argument given, treat it as the seed for the simulation
     if len(sys.argv) > 1:
         Consts.SIMULATION_SEED = int(sys.argv[1])

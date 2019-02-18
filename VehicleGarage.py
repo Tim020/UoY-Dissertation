@@ -3,6 +3,7 @@ import numpy as np
 import random
 import scipy.stats as stats
 
+import Consts
 from DriverModel import IDM
 from Vehicle import Car, Truck
 
@@ -35,7 +36,8 @@ class Garage(object):
         self._uuid_generator.seed_instance(seed)
         self._cars = 0
         self._trucks = 0
-        self._debug_file = open('debug/garage.txt', 'w')
+        if Consts.DEBUG_MODE:
+            self._debug_file = open('debug/garage.txt', 'w')
 
     def new_vehicle(self):
         if self._random.randint(0, 99) < self._car_pct:
@@ -49,5 +51,7 @@ class Garage(object):
                                 IDM)
             self._trucks += 1
 
-        self._debug_file.write('{}\n'.format(new_vehicle.__str__()))
+        if Consts.DEBUG_MODE:
+            self._debug_file.write('{}\n'.format(new_vehicle.__str__()))
+            self._debug_file.write('{}\n'.format(new_vehicle.__str__()))
         return new_vehicle

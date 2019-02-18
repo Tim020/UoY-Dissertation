@@ -50,8 +50,9 @@ class Vehicle(object):
         if self.lead_vehicle:
             assert(self.lead_vehicle.position > self.position)
 
-        self._file.write('{},{},{}\n'.format(self.velocity, self.position,
-                                             self.gap))
+        if Consts.DEBUG_MODE:
+            self._file.write('{},{},{}\n'.format(self.velocity, self.position,
+                                                 self.gap))
 
         # print('{}|{}: Lane: {}, '
         #       'Position: {}, Velocity: {}'.format(self._label, self._id,
@@ -74,9 +75,10 @@ class Vehicle(object):
         else:
             self.gap = Consts.BRIDGE_LENGTH + 100
             self.velocity = self.desired_velocity
-        os.makedirs('debug/lane_{}'.format(self.lane), exist_ok=True)
-        self._file = open('debug/lane_{}/{}.txt'.format(self.lane, self._id),
-                          'w')
+        if Consts.DEBUG_MODE:
+            os.makedirs('debug/lane_{}'.format(self.lane), exist_ok=True)
+            self._file = open('debug/lane_{}/{}.txt'.format(self.lane,
+                                                            self._id), 'w')
 
     def set_lane(self, lane):
         self.lane = lane
@@ -85,7 +87,8 @@ class Vehicle(object):
         return self._bridge.get_safetime_headway(self.lane, self.position)
 
     def finalise(self):
-        self._file.close()
+        if Consts.DEBUG_MODE:
+            self._file.close()
 
     def __str__(self):
         return '{}({}, {})'.format(self._label, self._id,

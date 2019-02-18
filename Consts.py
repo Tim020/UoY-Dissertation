@@ -1,5 +1,7 @@
 import random
 
+DEBUG_MODE = False
+
 # How often the simulation updates
 SIMULATION_FREQUENCY = 0.001
 

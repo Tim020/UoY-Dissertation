@@ -1,6 +1,7 @@
 import os
 import random
 
+import Consts
 import Vehicle
 
 
@@ -22,9 +23,10 @@ class Bridge(object):
         self._calls = 0
         self._cars = 0
         self._trucks = 0
-        os.makedirs('debug/bridge', exist_ok=True)
-        self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane), 'w')
-                            for lane in range(self.lanes * 2)]
+        if Consts.DEBUG_MODE:
+            os.makedirs('debug/bridge', exist_ok=True)
+            self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane),
+                                     'w') for lane in range(self.lanes * 2)]
 
     def add_vehicle(self, vehicle):
         self._calls += 1
@@ -90,7 +92,8 @@ class Bridge(object):
             self._cars += 1
         else:
             self._trucks += 1
-        self._lane_files[lane].write('{}\n'.format(vehicle._id))
+        if Consts.DEBUG_MODE:
+            self._lane_files[lane].write('{}\n'.format(vehicle._id))
 
     def update(self):
         # Step 1: Parallel calculate new parameters for all vehicles
