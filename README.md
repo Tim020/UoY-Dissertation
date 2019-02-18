@@ -1,7 +1,5 @@
 TODO:
-
-* fix vehicle uuid seeding
-* jam distance distribution
+* minumum jam distance distribution - user set mean
 * uniform distributions
 * variable vehicle lengths - set by user + some variance for funsies
 * vehicle weight property - normal & bimodal
@@ -11,4 +9,7 @@ TODO:
 * truck platooning
 * multi-lane behaviour?
 * variable safetime headway
+* user setting of vehicle speed variance
 
+DONE:
+* fix vehicle uuid seeding
