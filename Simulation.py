@@ -37,7 +37,7 @@ class Simulation(object):
             self.simulated_time += time_step
             # print('Update at {}, simulated time: {}s'.
             #       format(self.env.now, self.simulated_time))
-            if self._next_vehicle_in <= 0:
+            if self._next_vehicle_in <= time_step:
                 new_vehicle = self.garage.new_vehicle()
                 if self.bridge.add_vehicle(new_vehicle):
                     # print('New vehicle added')
