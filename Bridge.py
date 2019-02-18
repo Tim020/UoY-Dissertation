@@ -23,22 +23,26 @@ class Bridge(object):
         self._cars = 0
         self._trucks = 0
         os.makedirs('debug/bridge', exist_ok=True)
-        self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane), 'w') for lane in range(self.lanes * 2)]
+        self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane), 'w')
+                            for lane in range(self.lanes * 2)]
 
     def add_vehicle(self, vehicle):
         self._calls += 1
         lane = self._random.randint(0, (self.lanes * 2) - 1)
         lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
         if lead_vehicle:
-            if lead_vehicle.position - lead_vehicle.length >= vehicle.minimum_distance:
+            if (lead_vehicle.position - lead_vehicle.length >=
+                    vehicle.minimum_distance):
                 self._add_vehicle(vehicle, lead_vehicle, lane)
                 return True
             else:
                 # Could not add to this lane, so go through all lanes and find
                 # the first place we can add this new vehicle to
                 for lane, _ in enumerate(self.vehicles):
-                    lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
-                    if lead_vehicle.position - lead_vehicle.length >= vehicle.minimum_distance:
+                    lead_vehicle = self.vehicles[lane][-1] if self.vehicles[
+                        lane] else None
+                    if (lead_vehicle.position - lead_vehicle.length >=
+                            vehicle.minimum_distance):
                         self._add_vehicle(vehicle, lead_vehicle, lane)
                         return True
                 return False
@@ -62,9 +66,11 @@ class Bridge(object):
                     can_add_zone = False
                     break
             if can_add_zone:
-                self.headway_zones[lane].append(SafetimeHeadwayZone(start, end, time))
+                self.headway_zones[lane].append(SafetimeHeadwayZone(start, end,
+                                                                    time))
         else:
-            self.headway_zones[lane].append(SafetimeHeadwayZone(start, end, time))
+            self.headway_zones[lane].append(SafetimeHeadwayZone(start, end,
+                                                                time))
 
     def get_safetime_headway(self, lane, position):
         if self.headway_zones[lane]:

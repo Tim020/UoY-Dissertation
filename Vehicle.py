@@ -4,8 +4,8 @@ import Consts
 
 
 class Vehicle(object):
-    def __init__(self, _id, desired_velocity, max_acceleration, max_deceleration,
-                 minimum_distance, length, model):
+    def __init__(self, _id, desired_velocity, max_acceleration,
+                 max_deceleration, minimum_distance, length, model):
         self._id = _id
         self._label = 'Base'
         self._bridge = None
@@ -50,7 +50,8 @@ class Vehicle(object):
         if self.lead_vehicle:
             assert(self.lead_vehicle.position > self.position)
 
-        self._file.write('{},{},{}\n'.format(self.velocity, self.position, self.gap))
+        self._file.write('{},{},{}\n'.format(self.velocity, self.position,
+                                             self.gap))
 
         # print('{}|{}: Lane: {}, '
         #       'Position: {}, Velocity: {}'.format(self._label, self._id,
@@ -74,7 +75,8 @@ class Vehicle(object):
             self.gap = Consts.BRIDGE_LENGTH + 100
             self.velocity = self.desired_velocity
         os.makedirs('debug/lane_{}'.format(self.lane), exist_ok=True)
-        self._file = open('debug/lane_{}/{}.txt'.format(self.lane, self._id), 'w')
+        self._file = open('debug/lane_{}/{}.txt'.format(self.lane, self._id),
+                          'w')
 
     def set_lane(self, lane):
         self.lane = lane

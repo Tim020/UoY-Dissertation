@@ -14,8 +14,10 @@ class Simulation(object):
     def __init__(self, env):
         self.env = env
         self.simulated_time = 0
-        self.action = env.process(self.update(Consts.SIMULATION_FREQUENCY, Consts.TIME_STEP))
-        self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED, Consts.BRIDGE_LENGTH, 1, 1)
+        self.action = env.process(self.update(Consts.SIMULATION_FREQUENCY,
+                                              Consts.TIME_STEP))
+        self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED,
+                                    Consts.BRIDGE_LENGTH, 1, 1)
         # self.bridge.add_safetime_headway_zone_all_lanes(65, 80, 5)
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
@@ -32,7 +34,8 @@ class Simulation(object):
     def update(self, frequency, time_step):
         while True:
             self.simulated_time += time_step
-            # print('Update at {}, simulated time: {}s'.format(self.env.now, self.simulated_time))
+            # print('Update at {}, simulated time: {}s'.
+            #       format(self.env.now, self.simulated_time))
             if self._next_vehicle_in <= 0:
                 new_vehicle = self.garage.new_vehicle()
                 if self.bridge.add_vehicle(new_vehicle):
@@ -64,7 +67,8 @@ if __name__ == '__main__':
 
     environment = simpy.RealtimeEnvironment()
     simulation = Simulation(environment)
-    total_sim_time = Consts.SIMULATION_LENGTH * (Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
+    total_sim_time = Consts.SIMULATION_LENGTH * (
+                Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
     start_time = time.time()
     environment.run(until=total_sim_time)
     end_time = time.time()
