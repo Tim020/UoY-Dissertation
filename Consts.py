@@ -26,3 +26,7 @@ SIMULATION_SHORT_SEED = SIMULATION_SEED >> (128 - 32)
 
 # Number of vehicles per per hour injected into the system
 INFLOW_RATE = 2000
+
+# Percentage of mean speed the distribution should go between ± for vehicles
+CAR_SPEED_VARIANCE = 20
+TRUCK_SPEED_VARIANCE = 10

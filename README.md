@@ -9,7 +9,7 @@ TODO:
 * truck platooning
 * multi-lane behaviour?
 * variable safetime headway
-* user setting of vehicle speed variance
 
 DONE:
 * fix vehicle uuid seeding
+* user setting of vehicle speed variance
