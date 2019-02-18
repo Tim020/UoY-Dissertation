@@ -12,6 +12,13 @@ class SafetimeHeadwayZone(object):
         self.time = time
 
 
+class SpeedLimitedZone(object):
+    def __init__(self, start, end, speed):
+        self.start = start
+        self.end = end
+        self.speed = speed
+
+
 class Bridge(object):
     def __init__(self, seed, length, lanes, safetime_headway):
         self.length = length
@@ -19,9 +26,11 @@ class Bridge(object):
         self.safetime_headway = safetime_headway
         self.vehicles = []
         self.headway_zones = []
+        self.speed_restricted_zones = []
         for i in range(self.lanes * 2):
             self.headway_zones.append([])
             self.vehicles.append([])
+            self.speed_restricted_zones.append([])
         self._random = random.Random(seed)
         self._calls = 0
         self._cars = 0
@@ -67,7 +76,7 @@ class Bridge(object):
         if self.headway_zones[lane]:
             can_add_zone = True
             for zone in self.headway_zones[lane]:
-                if start < zone.end and start > zone.start:
+                if zone.end > start > zone.start:
                     can_add_zone = False
                     break
             if can_add_zone:
@@ -76,6 +85,28 @@ class Bridge(object):
         else:
             self.headway_zones[lane].append(SafetimeHeadwayZone(start, end,
                                                                 time))
+
+    def add_speed_limited_zone_all_lanes(self, start, end, speed_limit):
+        for i in range(self.lanes * 2):
+            lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
+            if lane < 0:
+                start = self.length - end
+                end = self.length - start
+            self.add_safetime_headway_zone(start, end, speed_limit, lane)
+
+    def add_speed_limited_zone(self, start, end, speed_limit, lane):
+        if self.speed_restricted_zones[lane]:
+            can_add_zone = True
+            for zone in self.speed_restricted_zones[lane]:
+                if zone.end > start > zone.start:
+                    can_add_zone = False
+                    break
+            if can_add_zone:
+                self.speed_restricted_zones[lane].append(
+                    SpeedLimitedZone(start, end, speed_limit))
+        else:
+            self.speed_restricted_zones[lane].append(
+                SpeedLimitedZone(start, end, speed_limit))
 
     def get_safetime_headway(self, lane, position):
         if self.headway_zones[lane]:
@@ -86,6 +117,15 @@ class Bridge(object):
             return self.safetime_headway
         else:
             return self.safetime_headway
+
+    def get_speed_limit(self, lane, position):
+        if self.speed_restricted_zones[lane]:
+            for zone in self.speed_restricted_zones[lane]:
+                if zone.end > position >= zone.start:
+                    return zone.speed
+            return None
+        else:
+            return None
 
     def _add_vehicle(self, vehicle, lead_vehicle, lane):
         vehicle.set_lane(lane)

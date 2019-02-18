@@ -30,8 +30,8 @@ class IDM(DriverModel):
         """
         dv(t)/dt = [1 - (v(t)/v0)^4  - (s*(t)/s(t))^2]
         """
-        acceleration = math.pow((vehicle.velocity / vehicle.desired_velocity),
-                                4)
+        acceleration = math.pow(
+            (vehicle.velocity / vehicle.get_desired_velocity()), 4)
         deceleration = math.pow(IDM.calc_desired_gap(vehicle) / vehicle.gap, 2)
         return vehicle.max_acceleration * (1 - acceleration - deceleration)
 

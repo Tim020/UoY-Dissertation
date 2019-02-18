@@ -21,6 +21,7 @@ class Simulation(object):
         self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED,
                                     Consts.BRIDGE_LENGTH, 1, 1)
         # self.bridge.add_safetime_headway_zone_all_lanes(65, 80, 5)
+        # self.bridge.add_speed_limited_zone_all_lanes(50, 100, 15)
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
                                            Consts.CAR_PCT, Consts.TRUCK_PCT,

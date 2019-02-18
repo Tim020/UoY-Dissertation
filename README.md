@@ -13,3 +13,4 @@ TODO:
 DONE:
 * fix vehicle uuid seeding
 * user setting of vehicle speed variance
+* speed limited sections of the bridge

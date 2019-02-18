@@ -49,8 +49,9 @@ class Vehicle(object):
         self.gap = self._new_gap
 
         assert(self.velocity >= 0)
+        assert(self.position >= 0)
         if self.lead_vehicle:
-            assert(self.lead_vehicle.position > self.position)
+            assert(self.lead_vehicle.position - self.lead_vehicle.length >= self.position)
 
         if Consts.DEBUG_MODE:
             self._file.write('{},{},{},{}\n'.format(simulated_time,
@@ -88,6 +89,10 @@ class Vehicle(object):
 
     def get_safetime_headway(self):
         return self._bridge.get_safetime_headway(self.lane, self.position)
+
+    def get_desired_velocity(self):
+        bridge_limit = self._bridge.get_speed_limit(self.lane, self.position)
+        return bridge_limit if bridge_limit else self.desired_velocity
 
     def finalise(self):
         if Consts.DEBUG_MODE:
