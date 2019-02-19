@@ -49,25 +49,22 @@ class Bridge(object):
         self._calls += 1
         lane = self._random.randint(0, (self.lanes * 2) - 1)
         lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
-        if lead_vehicle:
-            if (lead_vehicle.position - lead_vehicle.length >=
-                    vehicle.minimum_distance):
-                self._add_vehicle(vehicle, lead_vehicle, lane)
-                return True
-            else:
-                # Could not add to this lane, so go through all lanes and find
-                # the first place we can add this new vehicle to
-                for lane, _ in enumerate(self.vehicles):
-                    lead_vehicle = self.vehicles[lane][-1] if self.vehicles[
-                        lane] else None
-                    if (lead_vehicle.position - lead_vehicle.length >=
-                            vehicle.minimum_distance):
-                        self._add_vehicle(vehicle, lead_vehicle, lane)
-                        return True
-                return False
-        else:
+        if ((lead_vehicle and lead_vehicle.position - lead_vehicle.length >=
+             vehicle.minimum_distance) or (lead_vehicle is None)):
             self._add_vehicle(vehicle, lead_vehicle, lane)
             return True
+        else:
+            # Could not add to this lane, so go through all lanes and find
+            # the first place we can add this new vehicle to
+            for lane, _ in enumerate(self.vehicles):
+                lead_vehicle = self.vehicles[lane][-1] if self.vehicles[
+                    lane] else None
+                if ((lead_vehicle and lead_vehicle.position -
+                     lead_vehicle.length >= vehicle.minimum_distance)
+                        or (lead_vehicle is None)):
+                    self._add_vehicle(vehicle, lead_vehicle, lane)
+                    return True
+            return False
 
     def add_safetime_headway_zone_all_lanes(self, start, end, time):
         for i in range(self.lanes * 2):
