@@ -49,15 +49,17 @@ class IDM(DriverModel):
 
     @staticmethod
     def calc_velocity(vehicle):
-        new_velocity = vehicle.velocity + (
-                    IDM.calc_acceleration(vehicle) * Consts.TIME_STEP)
-        if new_velocity < 0:
-            new_velocity = 0
-        return new_velocity
+        new_velocity = IDM.calc_raw_velocity(vehicle)
+        return max(0, new_velocity)
+
+    @staticmethod
+    def calc_raw_velocity(vehicle):
+        return vehicle.velocity + (IDM.calc_acceleration(vehicle) *
+                                   Consts.TIME_STEP)
 
     @staticmethod
     def calc_position(vehicle):
-        if IDM.calc_velocity(vehicle) < 0:
+        if IDM.calc_raw_velocity(vehicle) < 0:
             new_position = (vehicle.position -
                             (0.5 * (math.pow(vehicle.velocity, 2) /
                                     IDM.calc_acceleration(vehicle))))
