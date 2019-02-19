@@ -183,7 +183,8 @@ class Bridge(object):
         if Consts.DEBUG_MODE:
             self._lane_files[lane].write('{}\n'.format(vehicle._id))
 
-    def update(self, time_step, simulated_time):
+    def update(self, time_step, simulated_time, queue):
+        vehicle_data = [[] for _ in range(self.lanes * 2)]
         # Step 1: Parallel calculate new parameters for all vehicles
         for lane in self.vehicles:
             for vehicle in lane:
@@ -200,6 +201,8 @@ class Bridge(object):
             for vehicle in lane:
                 if vehicle.position > self.length:
                     vehicles_to_remove[i].append(vehicle)
+                else:
+                    vehicle_data[i].append((vehicle._label, vehicle.position))
         for i, lane in enumerate(vehicles_to_remove):
             for vehicle in lane:
                 vehicle.finalise()
@@ -222,6 +225,8 @@ class Bridge(object):
         for i, lane in enumerate(self.space_detectors):
             for detector in lane:
                 detector.tick(time_step, simulated_time, self.vehicles[i])
+
+        queue.put(vehicle_data)
 
     def write_detector_output(self):
         for lane in self.point_detectors:
