@@ -2,6 +2,7 @@ import os
 import random
 
 import Consts
+from Detectors import PointDetector, SpaceDetector
 import Vehicle
 
 
@@ -27,10 +28,14 @@ class Bridge(object):
         self.vehicles = []
         self.headway_zones = []
         self.speed_restricted_zones = []
+        self.point_detectors = []
+        self.space_detectors = []
         for i in range(self.lanes * 2):
             self.headway_zones.append([])
             self.vehicles.append([])
             self.speed_restricted_zones.append([])
+            self.point_detectors.append([])
+            self.space_detectors.append([])
         self._random = random.Random(seed)
         self._calls = 0
         self._cars = 0
@@ -127,6 +132,49 @@ class Bridge(object):
         else:
             return None
 
+    def add_point_detector_all_lanes(self, position, time_interval):
+        for i in range(self.lanes * 2):
+            lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
+            if lane < 0:
+                position = self.length - position
+            self.add_point_detector(lane, position, time_interval)
+
+    def add_point_detector(self, lane, position, time_interval):
+        if self.point_detectors[lane]:
+            can_add_detector = True
+            for detector in self.point_detectors[lane]:
+                if detector.position == position:
+                    can_add_detector = False
+                    break
+            if can_add_detector:
+                self.point_detectors[lane].append(PointDetector(lane, position,
+                                                                time_interval))
+        else:
+            self.point_detectors[lane].append(PointDetector(lane, position,
+                                                            time_interval))
+
+    def add_space_detector_all_lanes(self, start, end, time_interval):
+        for i in range(self.lanes * 2):
+            lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
+            if lane < 0:
+                start = self.length - end
+                end = self.length - start
+            self.add_space_detector(lane, start, end, time_interval)
+
+    def add_space_detector(self, lane, start, end, time_interval):
+        if self.space_detectors[lane]:
+            can_add_detector = True
+            for detector in self.space_detectors[lane]:
+                if detector.end > start > detector.start:
+                    can_add_detector = False
+                    break
+            if can_add_detector:
+                self.space_detectors[lane].append(
+                    SpaceDetector(lane, start, end, time_interval))
+        else:
+            self.space_detectors[lane].append(
+                SpaceDetector(lane, start, end, time_interval))
+
     def _add_vehicle(self, vehicle, lead_vehicle, lane):
         vehicle.set_lane(lane)
         vehicle.add_to_road(self, lead_vehicle)
@@ -138,7 +186,7 @@ class Bridge(object):
         if Consts.DEBUG_MODE:
             self._lane_files[lane].write('{}\n'.format(vehicle._id))
 
-    def update(self, simulated_time):
+    def update(self, time_step, simulated_time):
         # Step 1: Parallel calculate new parameters for all vehicles
         for lane in self.vehicles:
             for vehicle in lane:
@@ -167,3 +215,21 @@ class Bridge(object):
                     vehicle.set_lead_vehicle(None)
                 else:
                     vehicle.set_lead_vehicle(lane[i - 1])
+
+        # Step 5: Update point detectors
+        for i, lane in enumerate(self.point_detectors):
+            for detector in lane:
+                detector.tick(time_step, simulated_time, self.vehicles[i])
+
+        # Step 6: Update space detectors
+        for i, lane in enumerate(self.space_detectors):
+            for detector in lane:
+                detector.tick(time_step, simulated_time, self.vehicles[i])
+
+    def write_detector_output(self):
+        for lane in self.point_detectors:
+            for detector in lane:
+                detector.write_results()
+        for lane in self.space_detectors:
+            for detector in lane:
+                detector.write_results()

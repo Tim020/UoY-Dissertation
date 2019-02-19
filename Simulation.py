@@ -21,7 +21,10 @@ class Simulation(object):
         self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED,
                                     Consts.BRIDGE_LENGTH, 1, 1)
         # self.bridge.add_safetime_headway_zone_all_lanes(65, 80, 5)
-        # self.bridge.add_speed_limited_zone_all_lanes(50, 100, 15)
+        # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
+        # self.bridge.add_point_detector_all_lanes(150, 1)
+        # self.bridge.add_space_detector_all_lanes(100, 200, 5)
+        # self.bridge.add_space_detector_all_lanes(250, 450, 5)
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
                                            Consts.CAR_PCT, Consts.TRUCK_PCT,
@@ -54,7 +57,7 @@ class Simulation(object):
             self._vehicles_per_hour = int((simulation._vehicle_count / Decimal(
                 simulation.simulated_time)) * 3600)
 
-            self.bridge.update(self.simulated_time)
+            self.bridge.update(time_step, self.simulated_time)
 
             yield self.env.timeout(frequency)
 
@@ -77,6 +80,8 @@ if __name__ == '__main__':
     start_time = time.time()
     environment.run(until=total_sim_time)
     end_time = time.time()
+
+    simulation.bridge.write_detector_output()
 
     print('Simulation finished after {} seconds.'.
           format(int(end_time - start_time)))

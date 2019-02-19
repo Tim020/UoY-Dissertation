@@ -28,6 +28,12 @@ class Vehicle(object):
         self.lead_vehicle = None
         self.lane = 0
 
+        # Previous values
+        self.prev_velocity = 0
+        self.prev_acceleration = 0
+        self.prev_position = 0
+        self.prev_gap = 0
+
         # Update values
         self._new_acceleration = None
         self._new_velocity = None
@@ -43,6 +49,13 @@ class Vehicle(object):
         self._new_gap = self.model.calc_gap(self)
 
     def update_new_params(self, simulated_time):
+        # Update previous positions
+        self.prev_velocity = self.velocity
+        self.prev_acceleration = self.acceleration
+        self.prev_position = self.position
+        self.prev_gap = self.gap
+
+        # Update new positions
         self.velocity = self._new_velocity
         self.acceleration = self._new_acceleration
         self.position = self._new_position
