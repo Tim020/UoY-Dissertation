@@ -218,7 +218,8 @@ class Bridge(object):
                 if vehicle.position > self.length:
                     vehicles_to_remove[i].append(vehicle)
                 else:
-                    vehicle_data[i].append((vehicle._label, vehicle.position))
+                    vehicle_data[i].append((vehicle._label, vehicle.position,
+                                            vehicle._id))
         for i, lane in enumerate(vehicles_to_remove):
             for vehicle in lane:
                 vehicle.finalise()
