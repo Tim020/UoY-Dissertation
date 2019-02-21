@@ -125,17 +125,19 @@ if __name__ == '__main__':
         Consts.SIMULATION_SEED = int(sys.argv[1])
         Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
 
-    disp = None
+    processes = []
     vehicle_queue = Queue()
 
     sim = Process(target=simulation_process, args=(vehicle_queue,))
+    processes.append(sim)
     if os.getenv("HEADLESS") is None:
         disp = Process(target=display_process, args=(vehicle_queue,))
     else:
         disp = Process(target=sink_process, args=(vehicle_queue,))
+    processes.append(disp)
 
-    sim.start()
-    disp.start()
+    for process in processes:
+        process.start()
 
-    sim.join()
-    disp.join()
+    for process in processes:
+        process.join()
