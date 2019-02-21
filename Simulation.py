@@ -95,12 +95,15 @@ def display_process(queue):
     display = Display.Display(600, 400, Consts.BRIDGE_LENGTH,
                               Consts.BRIDGE_LANES)
     running = True
+    start = time.time()
     while running:
         vehicle_data = queue.get()
         if type(vehicle_data) is list:
             display.paint(vehicle_data)
         elif vehicle_data is False:
             running = False
+    end = time.time()
+    print('Display finished after {} seconds.'.format(int(end - start)))
     display.cleanup()
 
 
