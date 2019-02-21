@@ -3,6 +3,8 @@ import pygame
 from pygame.locals import DOUBLEBUF
 import time
 
+import Consts
+
 
 class Display(object):
 
@@ -91,8 +93,9 @@ class Display(object):
         self.vehicles = {}
         self.all = pygame.sprite.RenderUpdates()
         Display.Vehicle.containers = self.all
+        self.remaining_time = 0
 
-    def paint(self, vehicle_data):
+    def paint(self, vehicle_data, conn):
         t = time.time()
         for _ in pygame.event.get():
             pass
@@ -137,7 +140,13 @@ class Display(object):
         updates = self.all.draw(self.screen)
         pygame.display.update(updates)
 
-        pygame.display.set_caption('Traffic Simulation Tool | {:.5f}'.format(time.time() - t))
+        if Consts.FORCE_DISPLAY_FREQ:
+            conn.send(time.time() - t)
+
+        while conn.poll():
+            self.remaining_time = conn.recv()
+
+        pygame.display.set_caption('Traffic Simulation Tool | {:.5f} | {:.5f} s'.format(time.time() - t, self.remaining_time))
 
     def cleanup(self):
         pygame.quit()

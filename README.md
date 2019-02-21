@@ -7,7 +7,6 @@ TODO:
 * truck platooning
 * multi-lane behaviour?
 * variable safetime headway
-* force simulation speed to be bound to display update speed (optionally)
 
 DONE:
 * fix vehicle uuid seeding
@@ -16,3 +15,4 @@ DONE:
 * bridge sensors
 * some sort of display for the simulation (let's draw a bridge)
 * speed up rendering by not continually drawing background
+* force simulation speed to be bound to display update speed (optionally)

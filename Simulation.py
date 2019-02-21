@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from decimal import *
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Pipe
 import os
 import shutil
 import simpy
@@ -15,10 +15,11 @@ import VehicleGarage
 
 
 class Simulation(object):
-    def __init__(self, env, finish_event, queue):
+    def __init__(self, env, finish_event, queue, conn):
         self.env = env
         self.finish_event = finish_event
         self.queue = queue
+        self.conn = conn
         self.simulated_time = 0
         self.action = env.process(self.update(Consts.SIMULATION_FREQUENCY,
                                               Consts.TIME_STEP))
@@ -40,6 +41,7 @@ class Simulation(object):
         self._next_vehicle_in = Decimal(0)
         self._vehicle_failures = 0
         self._vehicles_per_hour = 0
+        self.last_freq = 0
 
     def update(self, frequency, time_step):
         while True:
@@ -62,16 +64,45 @@ class Simulation(object):
             if self.simulated_time >= Consts.SIMULATION_LENGTH:
                 self.finish_event.succeed()
 
+            if self.conn and Consts.FORCE_DISPLAY_FREQ:
+                self.last_freq = frequency
+                new_frequency = frequency
+                while self.conn.poll():
+                    # Never go faster than the desired update frequency
+                    new_frequency = max(self.conn.recv(),
+                                        Consts.SIMULATION_FREQUENCY)
+
+                if (abs(((self.last_freq + new_frequency) / 2) - frequency) / frequency) * 100 > 10:
+                    frequency = new_frequency
+
+                    estimated_time = (Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP)
+                    print('Changed frequency. Estimated completion time: {} seconds'.format(estimated_time))
+            elif frequency != Consts.SIMULATION_FREQUENCY:
+                frequency = Consts.SIMULATION_FREQUENCY
+                estimated_time = (Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP)
+                print('Changed frequency. Estimated completion time: {} seconds'.format(estimated_time))
+
+            if self.conn:
+                self.conn.send((Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP))
+
             yield self.env.timeout(frequency)
 
 
-def simulation_process(queue):
+def simulation_process(queue, conn):
     print('Starting simulation with seed: {}'.format(Consts.SIMULATION_SEED))
     environment = simpy.RealtimeEnvironment()
     finish_event = environment.event()
-    simulation = Simulation(environment, finish_event, queue)
+    simulation = Simulation(environment, finish_event, queue, conn)
     total_sim_time = Consts.SIMULATION_LENGTH * (
             Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
+
+    time_str = 'Estimated simulation run time: {} seconds'.format(total_sim_time)
+    if Consts.FORCE_DISPLAY_FREQ:
+        time_str = (time_str + '\n[WARNING] Forcing simulation to sync with '
+                               'display. Simulation may take longer than '
+                               'estimated')
+    print(time_str)
+
     start_time = time.time()
     environment.run(until=finish_event)
     end_time = time.time()
@@ -92,7 +123,7 @@ def simulation_process(queue):
                                                   simulation.garage._trucks))
 
 
-def display_process(queue):
+def display_process(queue, conn):
     display = Display.Display(1600, 900, Consts.BRIDGE_LENGTH,
                               Consts.BRIDGE_LANES)
     running = True
@@ -100,7 +131,7 @@ def display_process(queue):
     while running:
         vehicle_data = queue.get()
         if type(vehicle_data) is list:
-            display.paint(vehicle_data)
+            display.paint(vehicle_data, conn)
         elif vehicle_data is False:
             running = False
     end = time.time()
@@ -127,13 +158,21 @@ if __name__ == '__main__':
 
     processes = []
     vehicle_queue = Queue()
+    c1 = None
 
-    sim = Process(target=simulation_process, args=(vehicle_queue,))
-    processes.append(sim)
     if os.getenv("HEADLESS") is None:
-        disp = Process(target=display_process, args=(vehicle_queue,))
+        conns = Pipe(True)
+        c1 = conns[0]
+        disp = Process(target=display_process, args=(vehicle_queue,
+                                                     conns[1],))
     else:
         disp = Process(target=sink_process, args=(vehicle_queue,))
+        Consts.FORCE_DISPLAY_FREQ = False
+
+    sim = Process(target=simulation_process, args=(vehicle_queue,
+                                                   c1,))
+
+    processes.append(sim)
     processes.append(disp)
 
     for process in processes:
