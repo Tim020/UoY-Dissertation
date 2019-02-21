@@ -44,15 +44,11 @@ class Simulation(object):
     def update(self, frequency, time_step):
         while True:
             self.simulated_time += time_step
-            # print('Update at {}, simulated time: {}s'.
-            #       format(self.env.now, self.simulated_time))
             if self._next_vehicle_in <= time_step:
                 new_vehicle = self.garage.new_vehicle()
                 if self.bridge.add_vehicle(new_vehicle):
-                    # print('New vehicle added')
                     self._vehicle_count += 1
                 else:
-                    # print('Could not add new vehicle at this time')
                     self._vehicle_failures += 1
                     pass
                 self._next_vehicle_in = self._vehicle_timer
@@ -76,7 +72,6 @@ def simulation_process(queue):
     simulation = Simulation(environment, finish_event, queue)
     total_sim_time = Consts.SIMULATION_LENGTH * (
             Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
-    # print('Simulation will take {} seconds'.format(total_sim_time))
     start_time = time.time()
     environment.run(until=finish_event)
     end_time = time.time()
@@ -141,7 +136,6 @@ if __name__ == '__main__':
 
     sim.start()
     disp.start()
-    print('Hello world, my name is Joe and I work in a button factory')
+
     sim.join()
     disp.join()
-    print('Goodnight, sweet prince')

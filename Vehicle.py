@@ -71,11 +71,6 @@ class Vehicle(object):
                                                     self.velocity,
                                                     self.position, self.gap))
 
-        # print('{}|{}: Lane: {}, '
-        #       'Position: {}, Velocity: {}'.format(self._label, self._id,
-        #                                           self.lane, self.position,
-        #                                           self.velocity))
-
     def set_desired_speed(self, desired_velocity):
         self.desired_velocity = desired_velocity
 
