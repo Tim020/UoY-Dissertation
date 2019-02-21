@@ -113,6 +113,14 @@ def display_process(queue):
     display.cleanup()
 
 
+def sink_process(queue):
+    running = True
+    while running:
+        data = queue.get()
+        if type(data) is bool and data is False:
+            running = False
+
+
 if __name__ == '__main__':
     if os.path.isdir('debug'):
         print('Removing old debug files')
@@ -122,9 +130,15 @@ if __name__ == '__main__':
         Consts.SIMULATION_SEED = int(sys.argv[1])
         Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
 
+    disp = None
     vehicle_queue = Queue()
+
     sim = Process(target=simulation_process, args=(vehicle_queue,))
-    disp = Process(target=display_process, args=(vehicle_queue,))
+    if os.getenv("HEADLESS") is None:
+        disp = Process(target=display_process, args=(vehicle_queue,))
+    else:
+        disp = Process(target=sink_process, args=(vehicle_queue,))
+
     sim.start()
     disp.start()
     print('Hello world, my name is Joe and I work in a button factory')
