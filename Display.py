@@ -47,6 +47,7 @@ class Display(object):
         self.truck = pygame.transform.scale(self.truck, (int(self.truck.get_size()[0] / scale_factor), int(self.truck.get_size()[1] / scale_factor)))
 
         W = math.ceil(bridge_length / self.bridge_tile_length) * self.road.get_size()[0]
+        H = (self.bridge_lanes * self.road.get_size()[1]) + 20
         self.bridge_pixels = math.ceil(bridge_length / self.bridge_tile_length) * self.road.get_size()[0]
 
         self.lane_positions = []

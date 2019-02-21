@@ -93,7 +93,7 @@ def simulation_process(queue):
 
 
 def display_process(queue):
-    display = Display.Display(600, 400, Consts.BRIDGE_LENGTH,
+    display = Display.Display(1600, 900, Consts.BRIDGE_LENGTH,
                               Consts.BRIDGE_LANES)
     running = True
     start = time.time()
