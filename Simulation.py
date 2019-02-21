@@ -15,8 +15,9 @@ import VehicleGarage
 
 
 class Simulation(object):
-    def __init__(self, env, queue):
+    def __init__(self, env, finish_event, queue):
         self.env = env
+        self.finish_event = finish_event
         self.queue = queue
         self.simulated_time = 0
         self.action = env.process(self.update(Consts.SIMULATION_FREQUENCY,
@@ -62,18 +63,22 @@ class Simulation(object):
 
             self.bridge.update(time_step, self.simulated_time, self.queue)
 
+            if self.simulated_time >= Consts.SIMULATION_LENGTH:
+                self.finish_event.succeed()
+
             yield self.env.timeout(frequency)
 
 
 def simulation_process(queue):
     print('Starting simulation with seed: {}'.format(Consts.SIMULATION_SEED))
     environment = simpy.RealtimeEnvironment()
-    simulation = Simulation(environment, queue)
+    finish_event = environment.event()
+    simulation = Simulation(environment, finish_event, queue)
     total_sim_time = Consts.SIMULATION_LENGTH * (
             Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
-    print('Simulation will take {} seconds'.format(total_sim_time))
+    # print('Simulation will take {} seconds'.format(total_sim_time))
     start_time = time.time()
-    environment.run(until=total_sim_time)
+    environment.run(until=finish_event)
     end_time = time.time()
     print('Simulation finished after {} seconds.'.format(int(end_time - start_time)))
     queue.put(False)
