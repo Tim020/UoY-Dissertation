@@ -14,3 +14,4 @@ DONE:
 * user setting of vehicle speed variance
 * speed limited sections of the bridge
 * bridge sensors
+* speed up rendering by not continually drawing background

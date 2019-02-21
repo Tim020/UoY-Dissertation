@@ -64,17 +64,21 @@ class Display(object):
         self.truck = self.truck.convert_alpha()
 
         self.background = pygame.Surface((W + 20, H))
+        self.road_surface = pygame.Surface((W + 20, self.bridge_lanes * self.road.get_size()[1]))
         self.background.fill((0, 128, 0))
         for lane_num in range(self.bridge_lanes):
             for tile_num in range(math.ceil(self.bridge_length / self.bridge_tile_length) + 2):
                 if self.bridge_lanes == 1:
-                    self.background.blit(self.road_single, (10 + ((tile_num - 1) * self.road_single.get_size()[0]), 10 + (lane_num * self.road_single.get_size()[1])))
+                    self.road_surface.blit(self.road_single, (10 + ((tile_num - 1) * self.road_single.get_size()[0]), (lane_num * self.road_single.get_size()[1])))
                 elif lane_num == 0:
-                    self.background.blit(self.road_top, (10 + ((tile_num - 1) * self.road_top.get_size()[0]), 10 + (lane_num * self.road_top.get_size()[1])))
+                    self.road_surface.blit(self.road_top, (10 + ((tile_num - 1) * self.road_top.get_size()[0]), (lane_num * self.road_top.get_size()[1])))
                 elif lane_num == self.bridge_lanes - 1:
-                    self.background.blit(self.road_bottom, (10 + ((tile_num - 1) * self.road_bottom.get_size()[0]), 10 + (lane_num * self.road_bottom.get_size()[1])))
+                    self.road_surface.blit(self.road_bottom, (10 + ((tile_num - 1) * self.road_bottom.get_size()[0]), (lane_num * self.road_bottom.get_size()[1])))
                 else:
-                    self.background.blit(self.road, (10 + ((tile_num - 1) * self.road.get_size()[0]), 10 + (lane_num * self.road.get_size()[1])))
+                    self.road_surface.blit(self.road, (10 + ((tile_num - 1) * self.road.get_size()[0]), (lane_num * self.road.get_size()[1])))
+
+        self.screen.blit(self.background, (0, 0))
+        pygame.display.update()
 
         pygame.display.set_caption('Traffic Simulation Tool')
 
@@ -83,7 +87,7 @@ class Display(object):
         for _ in pygame.event.get():
             pass
 
-        self.screen.blit(self.background,  (0, 0))
+        self.screen.blit(self.road_surface, (0, 10))
 
         updates = []
         for i, lane in enumerate(vehicle_data):
@@ -109,7 +113,7 @@ class Display(object):
                 updates.append(self.screen.blit(sprite, (x_position, y_position)))
 
         pygame.display.update(updates)
-        pygame.display.set_caption('Traffic Simulation Tool | {:.2f}'.format(time.time() - t))
+        pygame.display.set_caption('Traffic Simulation Tool | {:.5f}'.format(time.time() - t))
 
     def cleanup(self):
         pygame.quit()
