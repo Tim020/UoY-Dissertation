@@ -71,6 +71,7 @@ def simulation_process(queue):
     simulation = Simulation(environment, queue)
     total_sim_time = Consts.SIMULATION_LENGTH * (
             Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
+    print('Simulation will take {} seconds'.format(total_sim_time))
     start_time = time.time()
     environment.run(until=total_sim_time)
     end_time = time.time()
