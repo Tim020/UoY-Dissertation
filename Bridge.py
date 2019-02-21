@@ -45,6 +45,8 @@ class Bridge(object):
             self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane),
                                      'w') for lane in range(self.lanes * 2)]
 
+    # New vehicles #
+
     def add_vehicle(self, vehicle):
         self._calls += 1
         lane = self._random.randint(0, (self.lanes * 2) - 1)
@@ -66,13 +68,27 @@ class Bridge(object):
                     return True
             return False
 
+    def _add_vehicle(self, vehicle, lead_vehicle, lane):
+        vehicle.set_lane(lane)
+        vehicle.add_to_road(self, lead_vehicle)
+        self.vehicles[lane].append(vehicle)
+        if type(vehicle) == Vehicle.Car:
+            self._cars += 1
+        else:
+            self._trucks += 1
+        if Consts.DEBUG_MODE:
+            self._lane_files[lane].write('{}\n'.format(vehicle._id))
+
+    # Safetime Headway Zones #
+
     def add_safetime_headway_zone_all_lanes(self, start, end, time):
         for i in range(self.lanes * 2):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
-                start = self.length - end
-                end = self.length - start
-            self.add_safetime_headway_zone(start, end, time, lane)
+                self.add_safetime_headway_zone(self.length - end,
+                                               self.length - start, time, lane)
+            else:
+                self.add_safetime_headway_zone(start, end, time, lane)
 
     def add_safetime_headway_zone(self, start, end, time, lane):
         if self.headway_zones[lane]:
@@ -88,13 +104,27 @@ class Bridge(object):
             self.headway_zones[lane].append(SafetimeHeadwayZone(start, end,
                                                                 time))
 
+    def get_safetime_headway(self, lane, position):
+        if self.headway_zones[lane]:
+            for zone in self.headway_zones[lane]:
+                if zone.end > position >= zone.start:
+                    p = ((position - zone.start) / (zone.end - zone.start))
+                    return zone.time * p
+            return self.safetime_headway
+        else:
+            return self.safetime_headway
+
+    # Speed Limited Zones #
+
     def add_speed_limited_zone_all_lanes(self, start, end, speed_limit):
         for i in range(self.lanes * 2):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
-                start = self.length - end
-                end = self.length - start
-            self.add_safetime_headway_zone(start, end, speed_limit, lane)
+                self.add_speed_limited_zone(self.length - end,
+                                            self.length - start,
+                                            speed_limit, lane)
+            else:
+                self.add_speed_limited_zone(start, end, speed_limit, lane)
 
     def add_speed_limited_zone(self, start, end, speed_limit, lane):
         if self.speed_restricted_zones[lane]:
@@ -110,16 +140,6 @@ class Bridge(object):
             self.speed_restricted_zones[lane].append(
                 SpeedLimitedZone(start, end, speed_limit))
 
-    def get_safetime_headway(self, lane, position):
-        if self.headway_zones[lane]:
-            for zone in self.headway_zones[lane]:
-                if zone.end > position >= zone.start:
-                    p = ((position - zone.start) / (zone.end - zone.start))
-                    return zone.time * p
-            return self.safetime_headway
-        else:
-            return self.safetime_headway
-
     def get_speed_limit(self, lane, position):
         if self.speed_restricted_zones[lane]:
             for zone in self.speed_restricted_zones[lane]:
@@ -128,6 +148,8 @@ class Bridge(object):
             return None
         else:
             return None
+
+    # Point Detectors #
 
     def add_point_detector_all_lanes(self, position, time_interval):
         for i in range(self.lanes * 2):
@@ -148,15 +170,18 @@ class Bridge(object):
                                                                 time_interval))
         else:
             self.point_detectors[lane].append(PointDetector(lane, position,
-                                                            time_interval))
+                                                            time_interval))\
+
+    # Space Detectors #
 
     def add_space_detector_all_lanes(self, start, end, time_interval):
         for i in range(self.lanes * 2):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
-                start = self.length - end
-                end = self.length - start
-            self.add_space_detector(lane, start, end, time_interval)
+                self.add_space_detector(lane, self.length - end,
+                                        self.length - start, time_interval)
+            else:
+                self.add_space_detector(lane, start, end, time_interval)
 
     def add_space_detector(self, lane, start, end, time_interval):
         if self.space_detectors[lane]:
@@ -172,16 +197,7 @@ class Bridge(object):
             self.space_detectors[lane].append(
                 SpaceDetector(lane, start, end, time_interval))
 
-    def _add_vehicle(self, vehicle, lead_vehicle, lane):
-        vehicle.set_lane(lane)
-        vehicle.add_to_road(self, lead_vehicle)
-        self.vehicles[lane].append(vehicle)
-        if type(vehicle) == Vehicle.Car:
-            self._cars += 1
-        else:
-            self._trucks += 1
-        if Consts.DEBUG_MODE:
-            self._lane_files[lane].write('{}\n'.format(vehicle._id))
+    # Simulation update #
 
     def update(self, time_step, simulated_time, queue):
         vehicle_data = [[] for _ in range(self.lanes * 2)]
