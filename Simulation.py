@@ -76,12 +76,8 @@ class Simulation(object):
                 if (abs(((self.last_freq + new_frequency) / 2) - frequency) / frequency) * 100 > 10:
                     frequency = new_frequency
 
-                    estimated_time = (Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP)
-                    print('Changed frequency. Estimated completion time: {} seconds'.format(estimated_time))
             elif frequency != Consts.SIMULATION_FREQUENCY:
                 frequency = Consts.SIMULATION_FREQUENCY
-                estimated_time = (Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP)
-                print('Changed frequency. Estimated completion time: {} seconds'.format(estimated_time))
 
             if self.conn:
                 self.conn.send((Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP))
