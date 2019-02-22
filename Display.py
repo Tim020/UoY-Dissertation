@@ -1,4 +1,5 @@
 import math
+import os
 import pygame
 from pygame.locals import DOUBLEBUF
 import time
@@ -15,27 +16,28 @@ class Display(object):
         self.bridge_lanes = bridge_lanes
         self.bridge_tile_length = 16
 
-        self.road = pygame.image.load("road.png")
+        base_path = os.path.abspath(os.path.dirname(__file__))
+        self.road = pygame.image.load(os.path.join(base_path, 'resources', "road.png"))
         self.road = pygame.transform.scale(self.road, (int((self.road.get_size()[0] * 3)), int((self.road.get_size()[1] * 3))))
 
-        self.road_top = pygame.image.load("road_top.png")
+        self.road_top = pygame.image.load(os.path.join(base_path, 'resources', "road_top.png"))
         self.road_top = pygame.transform.scale(self.road_top, (int((self.road_top.get_size()[0] * 3)), int((self.road_top.get_size()[1] * 3))))
 
-        self.road_bottom = pygame.image.load("road_bottom.png")
+        self.road_bottom = pygame.image.load(os.path.join(base_path, 'resources', "road_bottom.png"))
         self.road_bottom = pygame.transform.scale(self.road_bottom, (int((self.road_bottom.get_size()[0] * 3)), int((self.road_bottom.get_size()[1] * 3))))
 
-        self.road_single = pygame.image.load("road_single.png")
+        self.road_single = pygame.image.load(os.path.join(base_path, 'resources', "road_single.png"))
         self.road_single = pygame.transform.scale(self.road_single, (int((self.road_single.get_size()[0] * 3)), int((self.road_single.get_size()[1] * 3))))
 
         assert(self.road.get_size() == self.road_top.get_size() == self.road_bottom.get_size() == self.road_single.get_size())
 
-        self.car = pygame.image.load("car.png")
+        self.car = pygame.image.load(os.path.join(base_path, 'resources', "car.png"))
         self.car = pygame.transform.scale(self.car, (int(self.car.get_size()[0] >> 3), int(self.car.get_size()[1] >> 3)))
 
-        self.truck = pygame.image.load("truck.png")
+        self.truck = pygame.image.load(os.path.join(base_path, 'resources', "truck.png"))
         self.truck = pygame.transform.scale(self.truck, (int(self.truck.get_size()[0] >> 1), int(self.truck.get_size()[1] >> 1)))
 
-        self.truck_platoon = pygame.image.load("truck_platoon.png")
+        self.truck_platoon = pygame.image.load(os.path.join(base_path, 'resources', "truck_platoon.png"))
         self.truck_platoon = pygame.transform.scale(self.truck_platoon, (int(self.truck_platoon.get_size()[0] >> 1), int(self.truck_platoon.get_size()[1] >> 1)))
 
         disp_info = pygame.display.Info()
