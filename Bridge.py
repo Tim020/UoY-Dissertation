@@ -281,7 +281,8 @@ class Bridge(object):
             for detector in lane:
                 detector.tick(time_step, simulated_time, self.vehicles[i])
 
-        queue.put(vehicle_data)
+        if queue:
+            queue.put(vehicle_data)
 
     def write_detector_output(self):
         for lane in self.point_detectors:

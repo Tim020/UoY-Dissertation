@@ -108,7 +108,8 @@ def simulation_process(queue, conn):
     environment.run(until=finish_event)
     end_time = time.time()
     print('Simulation finished after {} seconds.'.format(int(end_time - start_time)))
-    queue.put(False)
+    if queue:
+        queue.put(False)
 
     simulation.bridge.write_detector_output()
 
@@ -158,27 +159,23 @@ if __name__ == '__main__':
         Consts.SIMULATION_SEED = int(sys.argv[1])
         Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
 
-    processes = []
-    vehicle_queue = Queue()
-    c1 = None
-
     if os.getenv("HEADLESS") is None:
+        processes = []
+        vehicle_queue = Queue()
         conns = Pipe(True)
-        c1 = conns[0]
         disp = Process(target=display_process, args=(vehicle_queue,
                                                      conns[1],))
+        sim = Process(target=simulation_process, args=(vehicle_queue,
+                                                       conns[0],))
+
+        processes.append(sim)
+        processes.append(disp)
+
+        for process in processes:
+            process.start()
+
+        for process in processes:
+            process.join()
     else:
-        disp = Process(target=sink_process, args=(vehicle_queue,))
         Consts.FORCE_DISPLAY_FREQ = False
-
-    sim = Process(target=simulation_process, args=(vehicle_queue,
-                                                   c1,))
-
-    processes.append(sim)
-    processes.append(disp)
-
-    for process in processes:
-        process.start()
-
-    for process in processes:
-        process.join()
+        simulation_process(None, None)
