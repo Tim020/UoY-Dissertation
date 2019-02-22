@@ -5,7 +5,7 @@ DEBUG_MODE = True
 FORCE_DISPLAY_FREQ = True
 
 # How often the simulation updates
-SIMULATION_FREQUENCY = 0.001
+SIMULATION_FREQUENCY = 0.01
 
 # Length of simulation in seconds
 SIMULATION_LENGTH = 360
@@ -24,7 +24,7 @@ MINUMUM_GAP = 2
 
 # Length of the bridge for the simulation
 BRIDGE_LENGTH = 500
-BRIDGE_LANES = 3
+BRIDGE_LANES = 4
 
 # Seed used in this simulation - used to generate IDs of various things
 SIMULATION_SEED = random.getrandbits(128)
@@ -32,7 +32,7 @@ SIMULATION_SEED = random.getrandbits(128)
 SIMULATION_SHORT_SEED = SIMULATION_SEED >> (128 - 32)
 
 # Number of vehicles per per hour injected into the system
-INFLOW_RATE = 5000
+INFLOW_RATE = 10000
 
 # Percentage of mean speed the distribution should go between ± for vehicles
 CAR_SPEED_VARIANCE = 20
