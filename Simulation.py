@@ -93,14 +93,13 @@ def simulation_process(queue, conn):
     total_sim_time = Consts.SIMULATION_LENGTH * (
             Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
 
-    time_str = 'Estimated simulation run time: {} seconds'.format(total_sim_time)
+    print('Estimated simulation run time: {} seconds'.format(total_sim_time))
     if Consts.FORCE_DISPLAY_FREQ:
-        time_str = (time_str + '\n[WARNING] Forcing simulation to sync with '
-                               'display. Simulation may take longer than '
-                               'estimated')
-    print(time_str)
+        print('[WARNING] Forcing simulation to sync with display. '
+              'Simulation may take longer than estimated')
 
     start_time = time.time()
+    environment.sync()
     environment.run(until=finish_event)
     end_time = time.time()
     print('Simulation finished after {} seconds.'.format(int(end_time - start_time)))
