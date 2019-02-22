@@ -2,7 +2,6 @@ import os
 
 import Consts
 
-
 class Vehicle(object):
     def __init__(self, _id, desired_velocity, max_acceleration,
                  max_deceleration, minimum_distance, length, model, weight):
@@ -127,3 +126,23 @@ class Truck(Vehicle):
                          max_deceleration, minimum_distance, length, model,
                          weight)
         self._label = 'Truck'
+
+
+class PlatoonedTruck(Truck):
+    def __init__(self, _id, desired_velocity, max_acceleration,
+                 max_deceleration, minimum_distance, length, model, weight,
+                 is_leader, follow_distance):
+        super().__init__(_id, desired_velocity, max_acceleration,
+                         max_deceleration, minimum_distance, length, model,
+                         weight)
+        self._label = 'Platooned Truck'
+        self.is_leader = is_leader
+        self.follow_distance = follow_distance
+
+    def set_as_lead_vehicle(self):
+        self.is_leader = True
+
+    def set_lead_vehicle(self, vehicle):
+        if vehicle is None:
+            self.set_as_lead_vehicle()
+        super().set_lead_vehicle(vehicle)

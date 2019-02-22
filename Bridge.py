@@ -30,12 +30,14 @@ class Bridge(object):
         self.speed_restricted_zones = []
         self.point_detectors = []
         self.space_detectors = []
+        self.lane_queues = []
         for i in range(self.lanes * 2):
             self.headway_zones.append([])
             self.vehicles.append([])
             self.speed_restricted_zones.append([])
             self.point_detectors.append([])
             self.space_detectors.append([])
+            self.lane_queues.append([])
         self._random = random.Random(seed)
         self._calls = 0
         self._cars = 0
@@ -49,24 +51,47 @@ class Bridge(object):
 
     def add_vehicle(self, vehicle):
         self._calls += 1
-        lane = self._random.randint(0, (self.lanes * 2) - 1)
-        lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
-        if ((lead_vehicle and lead_vehicle.position - lead_vehicle.length >=
-             vehicle.minimum_distance) or (lead_vehicle is None)):
-            self._add_vehicle(vehicle, lead_vehicle, lane)
-            return True
-        else:
-            # Could not add to this lane, so go through all lanes and find
-            # the first place we can add this new vehicle to
-            for lane, _ in enumerate(self.vehicles):
-                lead_vehicle = self.vehicles[lane][-1] if self.vehicles[
-                    lane] else None
-                if ((lead_vehicle and lead_vehicle.position -
-                     lead_vehicle.length >= vehicle.minimum_distance)
-                        or (lead_vehicle is None)):
-                    self._add_vehicle(vehicle, lead_vehicle, lane)
+        if type(vehicle) is list:
+            lane = self._random.randint(0, (self.lanes * 2) - 1)
+            if self.lane_queues[lane]:
+                return False
+            else:
+                lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
+                if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length >= vehicle[0].minimum_distance) or (lead_vehicle is None)) and not self.lane_queues[lane]):
+                    self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
+                    self.lane_queues[lane] = vehicle
                     return True
-            return False
+                else:
+                    # Could not add to this lane, so go through all lanes and
+                    # find the first place we can add this new vehicle to
+                    for lane, _ in enumerate(self.vehicles):
+                        lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
+                        if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length >= vehicle[0].minimum_distance) or (lead_vehicle is None)) and not self.lane_queues[lane]):
+                            self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
+                            self.lane_queues[lane] = vehicle
+                            return True
+                    return False
+        else:
+            lane = self._random.randint(0, (self.lanes * 2) - 1)
+            lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
+            if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length
+                  >= vehicle.minimum_distance) or (lead_vehicle is None))
+                    and not self.lane_queues[lane]):
+                self._add_vehicle(vehicle, lead_vehicle, lane)
+                return True
+            else:
+                # Could not add to this lane, so go through all lanes and find
+                # the first place we can add this new vehicle to
+                for lane, _ in enumerate(self.vehicles):
+                    lead_vehicle = self.vehicles[lane][-1] if self.vehicles[
+                        lane] else None
+                    if (((lead_vehicle and lead_vehicle.position -
+                         lead_vehicle.length >= vehicle.minimum_distance)
+                            or (lead_vehicle is None))
+                            and not self.lane_queues[lane]):
+                        self._add_vehicle(vehicle, lead_vehicle, lane)
+                        return True
+                return False
 
     def _add_vehicle(self, vehicle, lead_vehicle, lane):
         vehicle.set_lane(lane)
@@ -78,6 +103,10 @@ class Bridge(object):
             self._trucks += 1
         if Consts.DEBUG_MODE:
             self._lane_files[lane].write('{}\n'.format(vehicle._id))
+
+    def _add_platooned_truck(self, vehicle, lead_vehicle, lane):
+        self._add_vehicle(vehicle, lead_vehicle, lane)
+        vehicle.position = vehicle.lead_vehicle.position - vehicle.lead_vehicle.length - vehicle.follow_distance
 
     # Safetime Headway Zones #
 
@@ -211,7 +240,16 @@ class Bridge(object):
             for vehicle in lane:
                 vehicle.update_new_params(simulated_time)
 
-        # Step 3: Remove any vehicle at the end of the bridge
+        # Step 3: Add next platoon truck for each platoon if possible:
+        for i, _ in enumerate(self.lane_queues):
+            if self.lane_queues[i]:
+                lead = self.vehicles[i][-1]
+                assert(lead is not None and type(lead) is Vehicle.PlatoonedTruck)
+                if lead.position - lead.length >= self.lane_queues[i][0].follow_distance:
+                    self._add_platooned_truck(self.lane_queues[i].pop(0), lead,
+                                              i)
+
+        # Step 4: Remove any vehicle at the end of the bridge
         vehicles_to_remove = [[] for _ in range(self.lanes * 2)]
         for i, lane in enumerate(self.vehicles):
             for vehicle in lane:
@@ -225,7 +263,7 @@ class Bridge(object):
                 vehicle.finalise()
                 self.vehicles[i].remove(vehicle)
 
-        # Step 4: Update lead vehicles for all remaining vehicles
+        # Step 5: Update lead vehicles for all remaining vehicles
         for lane in self.vehicles:
             for i, vehicle in enumerate(lane):
                 if i == 0:
@@ -233,12 +271,12 @@ class Bridge(object):
                 else:
                     vehicle.set_lead_vehicle(lane[i - 1])
 
-        # Step 5: Update point detectors
+        # Step 6: Update point detectors
         for i, lane in enumerate(self.point_detectors):
             for detector in lane:
                 detector.tick(time_step, simulated_time, self.vehicles[i])
 
-        # Step 6: Update space detectors
+        # Step 7: Update space detectors
         for i, lane in enumerate(self.space_detectors):
             for detector in lane:
                 detector.tick(time_step, simulated_time, self.vehicles[i])

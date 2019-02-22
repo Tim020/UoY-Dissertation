@@ -77,3 +77,36 @@ class IDM(DriverModel):
                     IDM.calc_position(vehicle) - vehicle.lead_vehicle.length)
         else:
             return Consts.BRIDGE_LENGTH + 100
+
+
+class TruckPlatoon(DriverModel):
+    @staticmethod
+    def calc_acceleration(vehicle):
+        if vehicle.is_leader:
+            return IDM.calc_acceleration(vehicle)
+        else:
+            return TruckPlatoon.calc_acceleration(vehicle.lead_vehicle)
+
+    @staticmethod
+    def calc_velocity(vehicle):
+        if vehicle.is_leader:
+            return IDM.calc_velocity(vehicle)
+        else:
+            return TruckPlatoon.calc_velocity(vehicle.lead_vehicle)
+
+    @staticmethod
+    def calc_position(vehicle):
+        if vehicle.is_leader:
+            return IDM.calc_position(vehicle)
+        else:
+            return (TruckPlatoon.calc_position(vehicle.lead_vehicle) -
+                    vehicle.lead_vehicle.length - vehicle.follow_distance)
+
+    @staticmethod
+    def calc_gap(vehicle):
+        if vehicle.lead_vehicle:
+            return (vehicle.lead_vehicle.position -
+                    TruckPlatoon.calc_position(vehicle) -
+                    vehicle.lead_vehicle.length)
+        else:
+            return Consts.BRIDGE_LENGTH + 100

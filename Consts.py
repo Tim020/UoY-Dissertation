@@ -16,6 +16,8 @@ TIME_STEP = 0.1
 # Percentage distribution of cars and truck traffic
 CAR_PCT = 80
 TRUCK_PCT = 20
+# Chance that when a truck is added to the road, it will be a platoon
+PLATOON_CHANCE = 20
 
 # Minimum distance to enforce between vehicles
 MINUMUM_GAP = 2

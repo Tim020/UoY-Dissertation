@@ -4,10 +4,11 @@ TODO:
 * variable vehicle lengths - set by user + some variance for funsies
 * vehicle weight property - normal & bimodal
 * some sort of UI for parameter configuration
-* truck platooning
 * multi-lane behaviour?
 * variable safetime headway
 * replay capability for display - play back old simulations
+* variable platoon lengths
+* variable platoon separation distances
 
 DONE:
 * fix vehicle uuid seeding
@@ -17,3 +18,4 @@ DONE:
 * some sort of display for the simulation (let's draw a bridge)
 * speed up rendering by not continually drawing background
 * force simulation speed to be bound to display update speed (optionally)
+* truck platooning

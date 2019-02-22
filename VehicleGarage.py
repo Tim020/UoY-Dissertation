@@ -4,8 +4,8 @@ import random
 import scipy.stats as stats
 
 import Consts
-from DriverModel import IDM
-from Vehicle import Car, Truck
+from DriverModel import IDM, TruckPlatoon
+from Vehicle import Car, Truck, PlatoonedTruck
 
 
 class Garage(object):
@@ -36,21 +36,35 @@ class Garage(object):
         self._uuid_generator.seed_instance(seed)
         self._cars = 0
         self._trucks = 0
+        self._truck_platoons = 0
         if Consts.DEBUG_MODE:
             self._debug_file = open('debug/garage.txt', 'w')
 
     def new_vehicle(self):
-        if self._random.randint(0, 99) < self._car_pct:
+        if self._random.randint(0, 100) < self._car_pct:
             vel = float(self._car_velocities.rvs(1)[0])
             new_vehicle = Car(self._uuid_generator.uuid4(), vel, 0.73, 1.67,
                               2, 4, IDM, 2000)
             self._cars += 1
         else:
             vel = float(self._truck_velocities.rvs(1)[0])
-            new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 0.73, 1.67,
-                                2, 12, IDM, 44000)
-            self._trucks += 1
+            if self._random.randint(0, 100) < Consts.PLATOON_CHANCE:
+                new_vehicle = []
+                for i in range(5):
+                    new_vehicle.append(
+                        PlatoonedTruck(self._uuid_generator.uuid4(), vel,
+                                       0.73, 1.67, 2, 12, TruckPlatoon,
+                                       44000, i == 0, 2))
+                    self._trucks += 1
+                self._truck_platoons += 1
+            else:
+                new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 0.73,
+                                    1.67, 2, 12, IDM, 44000)
+                self._trucks += 1
 
         if Consts.DEBUG_MODE:
-            self._debug_file.write('{}\n'.format(new_vehicle.__str__()))
+            if type(new_vehicle) is not list:
+                self._debug_file.write('{}\n'.format(new_vehicle.__str__()))
+            else:
+                self._debug_file.write('[{}]\n'.format(','.join(x.__str__() for x in new_vehicle)))
         return new_vehicle

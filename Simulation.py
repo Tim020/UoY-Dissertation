@@ -120,8 +120,9 @@ def simulation_process(queue, conn):
           format(simulation.bridge._calls, simulation.bridge._cars,
                  simulation.bridge._trucks, simulation._vehicle_failures))
 
-    print('\t[Garage] {} cars, {} trucks '.format(simulation.garage._cars,
-                                                  simulation.garage._trucks))
+    print('\t[Garage] {} cars, {} trucks, {} truck platoons'.
+          format(simulation.garage._cars, simulation.garage._trucks,
+                 simulation.garage._truck_platoons))
 
 
 def display_process(queue, conn):

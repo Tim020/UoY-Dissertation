@@ -35,6 +35,9 @@ class Display(object):
         self.truck = pygame.image.load("truck.png")
         self.truck = pygame.transform.scale(self.truck, (int(self.truck.get_size()[0] >> 1), int(self.truck.get_size()[1] >> 1)))
 
+        self.truck_platoon = pygame.image.load("truck_platoon.png")
+        self.truck_platoon = pygame.transform.scale(self.truck_platoon, (int(self.truck_platoon.get_size()[0] >> 1), int(self.truck_platoon.get_size()[1] >> 1)))
+
         disp_info = pygame.display.Info()
         desired_width = max(W, math.ceil(bridge_length / self.bridge_tile_length) * self.road.get_size()[0])
         scale_factor = 1
@@ -48,6 +51,7 @@ class Display(object):
 
         self.car = pygame.transform.scale(self.car, (int(self.car.get_size()[0] / scale_factor), int(self.car.get_size()[1] / scale_factor)))
         self.truck = pygame.transform.scale(self.truck, (int(self.truck.get_size()[0] / scale_factor), int(self.truck.get_size()[1] / scale_factor)))
+        self.truck_platoon = pygame.transform.scale(self.truck_platoon, (int(self.truck_platoon.get_size()[0] / scale_factor), int(self.truck_platoon.get_size()[1] / scale_factor)))
 
         W = math.ceil(bridge_length / self.bridge_tile_length) * self.road.get_size()[0]
         H = (self.bridge_lanes * self.road.get_size()[1]) + 20
@@ -66,6 +70,7 @@ class Display(object):
         self.road_single = self.road_single.convert_alpha()
         self.car = self.car.convert_alpha()
         self.truck = self.truck.convert_alpha()
+        self.truck_platoon = self.truck_platoon.convert_alpha()
 
         self.background = pygame.Surface((W + 20, H))
         self.road_surface = pygame.Surface((W + 20, self.bridge_lanes * self.road.get_size()[1]))
@@ -123,6 +128,12 @@ class Display(object):
                         x_position = x_position - sprite.get_size()[0]
                     else:
                         sprite = pygame.transform.flip(self.truck, True, False)
+                elif vehicle[0] == 'Platooned Truck':
+                    if l >= 0:
+                        sprite = self.truck_platoon
+                        x_position = x_position - sprite.get_size()[0]
+                    else:
+                        sprite = pygame.transform.flip(self.truck_platoon, True, False)
                 y_position = int(self.lane_positions[i] - (sprite.get_size()[1] / 2))
                 if vehicle[2] not in self.vehicles:
                     self.vehicles[vehicle[2]] = Display.Vehicle(sprite)
