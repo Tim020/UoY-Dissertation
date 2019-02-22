@@ -8,7 +8,7 @@ FORCE_DISPLAY_FREQ = True
 SIMULATION_FREQUENCY = 0.01
 
 # Length of simulation in seconds
-SIMULATION_LENGTH = 360
+SIMULATION_LENGTH = 36000
 
 # Simulation time step in seconds
 TIME_STEP = 0.1
@@ -17,7 +17,7 @@ TIME_STEP = 0.1
 CAR_PCT = 80
 TRUCK_PCT = 20
 # Chance that when a truck is added to the road, it will be a platoon
-PLATOON_CHANCE = 20
+PLATOON_CHANCE = 2
 
 # Minimum distance to enforce between vehicles
 MINUMUM_GAP = 2
