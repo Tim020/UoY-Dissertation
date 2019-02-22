@@ -26,8 +26,9 @@ class Simulation(object):
         self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED,
                                     Consts.BRIDGE_LENGTH,
                                     Consts.BRIDGE_LANES, 1)
-        # self.bridge.add_safetime_headway_zone_all_lanes(65, 80, 5)
+        # self.bridge.add_safetime_headway_zone_all_lanes(250, 450, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
+        # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
         # self.bridge.add_point_detector_all_lanes(150, 1)
         # self.bridge.add_space_detector_all_lanes(100, 200, 5)
         # self.bridge.add_space_detector_all_lanes(250, 450, 5)

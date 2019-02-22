@@ -7,6 +7,7 @@ TODO:
 * truck platooning
 * multi-lane behaviour?
 * variable safetime headway
+* replay capability for display - play back old simulations
 
 DONE:
 * fix vehicle uuid seeding
