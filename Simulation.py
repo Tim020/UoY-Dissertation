@@ -92,7 +92,7 @@ class Simulation(object):
 
 def simulation_process(queue, conn):
     print('Starting simulation with seed: {}'.format(Consts.SIMULATION_SEED))
-    environment = simpy.RealtimeEnvironment()
+    environment = simpy.RealtimeEnvironment(strict=False)
     finish_event = environment.event()
     simulation = Simulation(environment, finish_event, queue, conn)
     total_sim_time = Consts.SIMULATION_LENGTH * (

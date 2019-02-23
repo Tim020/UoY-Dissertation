@@ -9,7 +9,6 @@ TODO:
 * replay capability for display - play back old simulations
 * variable platoon lengths
 * variable platoon separation distances
-* handle the possibility of the simulation crashing due to being too slow
 
 DONE:
 * fix vehicle uuid seeding
@@ -20,3 +19,4 @@ DONE:
 * speed up rendering by not continually drawing background
 * force simulation speed to be bound to display update speed (optionally)
 * truck platooning
+* handle the possibility of the simulation crashing due to being too slow
