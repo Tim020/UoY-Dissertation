@@ -46,6 +46,8 @@ class Bridge(object):
             os.makedirs('debug/bridge', exist_ok=True)
             self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane),
                                      'w') for lane in range(self.lanes * 2)]
+        os.makedirs('replays', exist_ok=True)
+        self._replay_file = open('replays/replay-{}.sim'.format(seed), 'w')
 
     # New vehicles #
 
@@ -283,6 +285,9 @@ class Bridge(object):
 
         if queue:
             queue.put(vehicle_data)
+
+        self._replay_file.write('Simulation Step: {}\n'.format(simulated_time))
+        self._replay_file.write('{}\n'.format(vehicle_data))
 
     def write_detector_output(self):
         for lane in self.point_detectors:
