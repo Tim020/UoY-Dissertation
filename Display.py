@@ -101,6 +101,7 @@ class Display(object):
         self.all = pygame.sprite.RenderUpdates()
         Display.Vehicle.containers = self.all
         self.remaining_time = 0
+        self.simulated_time = 0
 
     def paint(self, vehicle_data, conn):
         t = time.time()
@@ -157,9 +158,11 @@ class Display(object):
             conn.send(time.time() - t)
 
         while conn.poll():
-            self.remaining_time = conn.recv()
+            data = conn.recv()
+            self.remaining_time = data[0]
+            self.simulated_time = data[1]
 
-        pygame.display.set_caption('Traffic Simulation Tool | {:.5f} | {:.5f} s'.format(time.time() - t, self.remaining_time))
+        pygame.display.set_caption('Traffic Simulation Tool | {:.5f} | {:.5f} s | {:.5f} s'.format(time.time() - t, self.remaining_time, self.simulated_time))
 
     def cleanup(self):
         pygame.quit()

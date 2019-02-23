@@ -85,7 +85,7 @@ class Simulation(object):
                 frequency = Consts.SIMULATION_FREQUENCY
 
             if self.conn:
-                self.conn.send((Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP))
+                self.conn.send(((Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP), self.simulated_time))
 
             yield self.env.timeout(frequency)
 
