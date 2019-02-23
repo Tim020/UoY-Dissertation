@@ -37,3 +37,11 @@ INFLOW_RATE = 10000
 # Percentage of mean speed the distribution should go between ± for vehicles
 CAR_SPEED_VARIANCE = 20
 TRUCK_SPEED_VARIANCE = 10
+
+# Minimum and maximum number of trucks allowed in a platoon
+MIN_PLATOON_LENGTH = 2
+MAX_PLATOON_LENGTH = 10
+
+# Minumum and maximum gap between trucks in a platoon
+MIN_PLATOON_GAP = 2
+MAX_PLATOON_GAP = 5

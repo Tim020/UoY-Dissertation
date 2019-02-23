@@ -36,7 +36,12 @@ class Simulation(object):
                                            Consts.SIMULATION_SHORT_SEED,
                                            Consts.CAR_PCT, Consts.TRUCK_PCT,
                                            33, 22, Consts.CAR_SPEED_VARIANCE,
-                                           Consts.TRUCK_SPEED_VARIANCE)
+                                           Consts.TRUCK_SPEED_VARIANCE,
+                                           Consts.PLATOON_CHANCE,
+                                           Consts.MIN_PLATOON_LENGTH,
+                                           Consts.MAX_PLATOON_LENGTH,
+                                           Consts.MIN_PLATOON_GAP,
+                                           Consts.MAX_PLATOON_GAP)
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)
         self._vehicle_count = Decimal(0)
         self._next_vehicle_in = Decimal(0)
