@@ -19,9 +19,10 @@ class Detector(object):
         raise NotImplementedError
 
     def write_results(self):
-        os.makedirs('debug/bridge/detectors'.format(self.lane), exist_ok=True)
-        _file = open('debug/bridge/detectors/{}.txt'.format(self.get_name()),
-                     'w')
+        os.makedirs('debug/bridge/detectors/{}'.
+                    format(self.lane), exist_ok=True)
+        _file = open('debug/bridge/detectors/{}/{}.txt'.
+                     format(self.lane, self.get_name()), 'w')
         results = {
             'micro': self.microscopic_data,
             'macro': self.macroscopic_data
@@ -38,7 +39,7 @@ class PointDetector(Detector):
         self.vehicle_count = 0
 
     def get_name(self):
-        return 'Point Detector: {}, {}'.format(self.lane, self.position)
+        return 'Point Detector: {}'.format(self.position)
 
     def tick(self, time_step, simulated_time, vehicles):
         for vehicle in vehicles:
@@ -74,8 +75,7 @@ class SpaceDetector(Detector):
         self.in_progress_vehicles = defaultdict(lambda: defaultdict(list))
 
     def get_name(self):
-        return 'Space Detector: {}, {}-{}'.format(self.lane, self.start,
-                                                  self.end)
+        return 'Space Detector: {}-{}'.format(self.start, self.end)
 
     def tick(self, time_step, simulated_time, vehicles):
         for vehicle in vehicles:

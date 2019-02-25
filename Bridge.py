@@ -186,8 +186,10 @@ class Bridge(object):
         for i in range(self.lanes * 2):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
-                position = self.length - position
-            self.add_point_detector(lane, position, time_interval)
+                self.add_point_detector(lane, self.length - position,
+                                        time_interval)
+            else:
+                self.add_point_detector(lane, position, time_interval)
 
     def add_point_detector(self, lane, position, time_interval):
         if self.point_detectors[lane]:
@@ -201,7 +203,7 @@ class Bridge(object):
                                                                 time_interval))
         else:
             self.point_detectors[lane].append(PointDetector(lane, position,
-                                                            time_interval))\
+                                                            time_interval))
 
     # Space Detectors #
 
