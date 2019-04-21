@@ -2,6 +2,7 @@ import os
 
 import Consts
 
+
 class Vehicle(object):
     def __init__(self, _id, desired_velocity, max_acceleration,
                  max_deceleration, minimum_distance, length, model, weight):

@@ -26,7 +26,7 @@ class Simulation(object):
         self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED,
                                     Consts.BRIDGE_LENGTH,
                                     Consts.BRIDGE_LANES, 1)
-        # self.bridge.add_safetime_headway_zone_all_lanes(250, 450, 10)
+        # self.bridge.add_safetime_headway_zone_all_lanes(245, 255, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
         # self.bridge.add_point_detector_all_lanes(150, 1)
@@ -112,6 +112,9 @@ def simulation_process(queue, conn):
     print('Simulation finished after {} seconds.'.format(int(end_time - start_time)))
     if queue:
         queue.put(False)
+    if conn:
+        while conn.poll():
+            conn.recv()
 
     simulation.bridge.write_detector_output()
 
@@ -139,6 +142,8 @@ def display_process(queue, conn):
             display.paint(vehicle_data, conn)
         elif vehicle_data is False:
             running = False
+            while conn.poll():
+                conn.recv()
     end = time.time()
     print('Display finished after {} seconds.'.format(int(end - start)))
     display.cleanup()
@@ -160,6 +165,9 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         Consts.SIMULATION_SEED = int(sys.argv[1])
         Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
+
+    if not Consts.SINGLE_LANE:
+        Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
 
     if os.getenv("HEADLESS") is None:
         processes = []

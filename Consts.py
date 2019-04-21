@@ -2,39 +2,43 @@ import random
 
 DEBUG_MODE = True
 
+# Seed used in this simulation - used to generate IDs of various things
+SIMULATION_SEED = random.getrandbits(128)
+# Need a 32 bit seed to use for the numpy random generators
+SIMULATION_SHORT_SEED = SIMULATION_SEED >> (128 - 32)
+
+# Whether force the simulation to update at the same frequency as the display
 FORCE_DISPLAY_FREQ = True
 
 # How often the simulation updates
 SIMULATION_FREQUENCY = 0.01
 
 # Length of simulation in seconds
-SIMULATION_LENGTH = 36000
+SIMULATION_LENGTH = 360
 
 # Simulation time step in seconds
 TIME_STEP = 0.1
 
 # Percentage distribution of cars and truck traffic
-CAR_PCT = 80
-TRUCK_PCT = 20
+CAR_PCT = 0
+TRUCK_PCT = 100
 # Chance that when a truck is added to the road, it will be a platoon
-PLATOON_CHANCE = 2
+PLATOON_CHANCE = 0
 
 # Minimum distance to enforce between vehicles
 MINUMUM_GAP = 2
 
 # Length of the bridge for the simulation
-BRIDGE_LENGTH = 500
-BRIDGE_LANES = 4
+BRIDGE_LENGTH = 1000
+# Whether to simulate only a single lane of traffic (True), or bi-directional traffic (False)
+SINGLE_LANE = True
+# Number of lanes of traffic per direction in bi-directional simulation
+BRIDGE_LANES = 1
 
-# Seed used in this simulation - used to generate IDs of various things
-SIMULATION_SEED = random.getrandbits(128)
-# Need a 32 bit seed to use for the numpy random generators
-SIMULATION_SHORT_SEED = SIMULATION_SEED >> (128 - 32)
+# Number of vehicles per per hour injected into the system (per lane)
+INFLOW_RATE = 2000
 
-# Number of vehicles per per hour injected into the system
-INFLOW_RATE = 10000
-
-# Average speed for trucks and cars
+# Average speed for trucks and cars (m/s)
 CAR_SPEED = 33
 TRUCK_SPEED = 22
 

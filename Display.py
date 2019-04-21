@@ -155,7 +155,8 @@ class Display(object):
         pygame.display.update(updates)
 
         if Consts.FORCE_DISPLAY_FREQ:
-            conn.send(time.time() - t)
+            if conn:
+                conn.send(time.time() - t)
 
         while conn.poll():
             data = conn.recv()

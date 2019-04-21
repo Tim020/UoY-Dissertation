@@ -20,3 +20,5 @@ DONE:
 * force simulation speed to be bound to display update speed (optionally)
 * truck platooning
 * handle the possibility of the simulation crashing due to being too slow
+
+uniform/normal/binormal distribution for truck weights (avg and std dev)
