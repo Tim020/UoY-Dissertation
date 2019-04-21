@@ -54,10 +54,11 @@ class PointDetector(Detector):
 
         if self.next_macro_update <= time_step:
             self.macroscopic_data[simulated_time] = {
-                'mean_velocity': ((sum(self.speeds) / len(self.speeds))
-                                  if self.speeds else 0),
-                'vehicles_per_hour': int((self.vehicle_count /
-                                          Decimal(simulated_time)) * 3600)
+                'time_mean_velocity': ((sum(self.speeds) / len(self.speeds))
+                                       if self.speeds else 0),
+                'space_mean_velocity': ((len(self.speeds) / sum((1/x) for x in self.speeds))
+                                        if self.speeds else 0),
+                'flow': int(3600 / Decimal(simulated_time) * self.vehicle_count)
             }
             self.next_macro_update = self.time_interval
         else:
