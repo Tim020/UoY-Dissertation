@@ -1,5 +1,4 @@
 from collections import defaultdict
-from decimal import *
 import json
 import os
 
@@ -58,8 +57,10 @@ class PointDetector(Detector):
                                        if self.speeds else 0),
                 'space_mean_velocity': ((len(self.speeds) / sum((1/x) for x in self.speeds))
                                         if self.speeds else 0),
-                'flow': int(3600 / Decimal(simulated_time) * self.vehicle_count)
+                'flow': int((3600 / self.time_interval) * self.vehicle_count)
             }
+            self.speeds = []
+            self.vehicle_count = 0
             self.next_macro_update = self.time_interval
         else:
             self.next_macro_update -= time_step
@@ -70,8 +71,6 @@ class SpaceDetector(Detector):
         super().__init__(lane, time_interval)
         self.start = start
         self.end = end
-        self.speeds = []
-        self.weights = []
         self.vehicle_count = 0
         self.in_progress_vehicles = defaultdict(lambda: defaultdict(list))
 
@@ -87,21 +86,36 @@ class SpaceDetector(Detector):
                     vehicle.gap)
             elif vehicle._id in self.in_progress_vehicles:
                 vehicle_data = self.in_progress_vehicles.pop(vehicle._id)
+
                 velocities = vehicle_data['velocity']
-                gaps = vehicle_data['space_headway']
                 average_velocity = sum(velocities) / len(velocities)
+
+                gaps = vehicle_data['space_headway']
                 average_gap = sum(gaps) / len(gaps)
-                self.speeds.append(average_velocity)
+
                 self.microscopic_data[vehicle._id] = {
-                    'average_velocity': average_gap,
+                    'average_velocity': average_velocity,
                     'average_space_headway': average_gap
                 }
 
         if self.next_macro_update <= time_step:
+            velocities = []
+            weights = []
+            for vehicle in vehicles:
+                if vehicle._id in self.in_progress_vehicles:
+                    velocities.append(vehicle.velocity)
+                    weights.append(vehicle.weight)
+
             self.macroscopic_data[simulated_time] = {
-                'mean_velocity': ((sum(self.speeds) / len(self.speeds))
-                                  if self.speeds else 0),
+                'time_mean_velocity': ((sum(velocities) / len(velocities))
+                                       if velocities else 0),
+                'space_mean_velocity': ((len(velocities) / sum((1/x) for x in velocities))
+                                        if velocities else 0),
+                'density': ((len(self.in_progress_vehicles) / ((self.end - self.start) / 1000))
+                            if self.in_progress_vehicles else 0),
+                'weight_load': sum(weights)
             }
+
             self.next_macro_update = self.time_interval
         else:
             self.next_macro_update -= time_step

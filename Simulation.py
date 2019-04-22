@@ -67,8 +67,8 @@ class Simulation(object):
         # self.bridge.add_safetime_headway_zone_all_lanes(245, 255, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
-        # self.bridge.add_point_detector_all_lanes(150, 1)
-        # self.bridge.add_space_detector_all_lanes(100, 200, 5)
+        self.bridge.add_point_detector_all_lanes(150, 60)
+        self.bridge.add_space_detector_all_lanes(100, 200, 60)
         # self.bridge.add_space_detector_all_lanes(250, 450, 5)
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
