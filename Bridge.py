@@ -2,8 +2,16 @@ import os
 import random
 
 import Consts
-from Detectors import PointDetector, SpaceDetector
+from Detectors import PointDetector, SpaceDetector, BridgeDetector
 import Vehicle
+
+
+def flatten(s):
+    if s == []:
+        return s
+    if isinstance(s[0], list):
+        return flatten(s[0]) + flatten(s[1:])
+    return s[:1] + flatten(s[1:])
 
 
 class SafetimeHeadwayZone(object):
@@ -48,6 +56,7 @@ class Bridge(object):
                                      'w') for lane in range(self.lanes * 2)]
         os.makedirs('replays', exist_ok=True)
         self._replay_file = open('replays/replay-{}.sim'.format(seed), 'w')
+        self.bridge_detector = BridgeDetector(60)
 
     # New vehicles #
 
@@ -291,6 +300,10 @@ class Bridge(object):
             for detector in lane:
                 detector.tick(time_step, simulated_time, self.vehicles[i])
 
+        # Step 8: Update bridge detector
+        self.bridge_detector.tick(time_step, simulated_time,
+                                  flatten(self.vehicles))
+
         if queue:
             queue.put(vehicle_data)
 
@@ -304,6 +317,7 @@ class Bridge(object):
         for lane in self.space_detectors:
             for detector in lane:
                 detector.write_results()
+        self.bridge_detector.write_results()
 
     def plot_detector_output(self):
         for lane in self.point_detectors:
@@ -312,3 +326,4 @@ class Bridge(object):
         for lane in self.space_detectors:
             for detector in lane:
                 detector.plot()
+        self.bridge_detector.plot()

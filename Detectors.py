@@ -201,3 +201,38 @@ class SpaceDetector(Detector):
             'density': 'Flow (veh/km)',
             'weight_load': 'Weight Load (kg)'
         }
+
+
+class BridgeDetector(Detector):
+    def __init__(self, time_interval):
+        super().__init__('Bridge', time_interval)
+
+    def get_name(self):
+        return 'Bridge Detector'
+
+    def tick(self, time_step, simulated_time, vehicles):
+        if self.next_macro_update <= time_step:
+            weight_load = []
+            velocities = []
+            for vehicle in vehicles:
+                weight_load.append(vehicle.weight)
+                velocities.append(vehicle.velocity)
+
+            self.macroscopic_data[simulated_time] = {
+                'time_mean_velocity': ((sum(velocities) / len(velocities))
+                                       if velocities else 0),
+                'space_mean_velocity': ((len(velocities) / sum((1 / x) for x in velocities))
+                                        if velocities else 0),
+                'weight_load': sum(weight_load)
+            }
+
+            self.next_macro_update = self.time_interval
+        else:
+            self.next_macro_update -= time_step
+
+    def get_plot_labels(self):
+        return {
+            'time_mean_velocity': 'Time Mean Velocity (m/s)',
+            'space_mean_velocity': 'Space Mean Velocity (m/s)',
+            'weight_load': 'Weight Load (kg)'
+        }
