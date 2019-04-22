@@ -2,8 +2,9 @@ from collections import defaultdict
 import csv
 import json
 import math
-import matplotlib
 import os
+
+import Consts
 
 
 class Detector(object):
@@ -25,10 +26,10 @@ class Detector(object):
 
     def write_results(self):
         # JSON output
-        os.makedirs('debug/bridge/detectors/{}'.
-                    format(self.lane), exist_ok=True)
-        _file = open('debug/bridge/detectors/{}/{}.txt'.
-                     format(self.lane, self.get_name()), 'w')
+        os.makedirs('output/{}/detectors/{}'.
+                    format(Consts.SIMULATION_SEED, self.lane), exist_ok=True)
+        _file = open('output/{}/detectors/{}/{}.json'.
+                     format(Consts.SIMULATION_SEED, self.lane, self.get_name()), 'w')
         results = {
             'micro': self.microscopic_data,
             'macro': self.macroscopic_data
@@ -37,8 +38,8 @@ class Detector(object):
         _file.close()
 
         # CSV output macroscopic
-        _file = open('debug/bridge/detectors/{}/{}_macro.csv'.
-                     format(self.lane, self.get_name()), 'w')
+        _file = open('output/{}/detectors/{}/{}_macro.csv'.
+                     format(Consts.SIMULATION_SEED, self.lane, self.get_name()), 'w')
         csvwriter = csv.writer(_file)
         count = 0
         for d in self.macroscopic_data:
@@ -88,7 +89,7 @@ class Detector(object):
         plt.subplots_adjust(top=0.85)
         plt.tight_layout()
         f.set_size_inches(16, 9)
-        plt.savefig('debug/bridge/detectors/{}/{}.png'.format(self.lane, self.get_name()), dpi=300)
+        plt.savefig('output/{}/detectors/{}/{}.png'.format(Consts.SIMULATION_SEED, self.lane, self.get_name()), dpi=300)
 
 
 class PointDetector(Detector):
@@ -205,7 +206,7 @@ class SpaceDetector(Detector):
 
 class BridgeDetector(Detector):
     def __init__(self, time_interval):
-        super().__init__('Bridge', time_interval)
+        super().__init__('bridge', time_interval)
 
     def get_name(self):
         return 'Bridge Detector'
