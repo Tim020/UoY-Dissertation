@@ -11,10 +11,10 @@ SIMULATION_SHORT_SEED = SIMULATION_SEED >> (128 - 32)
 FORCE_DISPLAY_FREQ = True
 
 # How often the simulation updates
-SIMULATION_FREQUENCY = 0.01
+SIMULATION_FREQUENCY = 0.001
 
 # Length of simulation in seconds
-SIMULATION_LENGTH = 360
+SIMULATION_LENGTH = 3600
 
 # Simulation time step in seconds
 TIME_STEP = 0.1

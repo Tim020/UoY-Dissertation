@@ -1,10 +1,12 @@
 import math
 import os
-import pygame
-from pygame.locals import DOUBLEBUF
+import contextlib
 import time
-
 import Consts
+
+with contextlib.redirect_stdout(None):
+    import pygame
+    from pygame.locals import DOUBLEBUF
 
 
 class Display(object):

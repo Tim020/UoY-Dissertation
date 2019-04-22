@@ -67,8 +67,8 @@ class Simulation(object):
         # self.bridge.add_safetime_headway_zone_all_lanes(245, 255, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
-        self.bridge.add_point_detector_all_lanes(150, 60)
-        self.bridge.add_space_detector_all_lanes(100, 200, 60)
+        self.bridge.add_point_detector_all_lanes(150, 10)
+        self.bridge.add_space_detector_all_lanes(100, 200, 10)
         # self.bridge.add_space_detector_all_lanes(250, 450, 5)
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
@@ -88,8 +88,10 @@ class Simulation(object):
         self._vehicle_failures = 0
         self._vehicles_per_hour = 0
         self.last_freq = 0
+        self.last_t = 0
 
     def update(self, frequency, time_step):
+        self.last_t = (Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP)
         while True:
             self.simulated_time += time_step
             if self._next_vehicle_in <= time_step:
@@ -126,6 +128,13 @@ class Simulation(object):
 
             if self.conn:
                 self.conn.send(((Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP), self.simulated_time))
+            else:
+                t = (Consts.SIMULATION_LENGTH - self.simulated_time) * (
+                            frequency / Consts.TIME_STEP)
+                if self.last_t - t > 1:
+                    self.last_t = t
+                    sys.stdout.write("\rTime Remaining: {:.5f}s".format(t))
+                    sys.stdout.flush()
 
             yield self.env.timeout(frequency)
 
@@ -147,6 +156,8 @@ def simulation_process(queue, conn):
     environment.sync()
     environment.run(until=finish_event)
     end_time = time.time()
+    if os.getenv("HEADLESS"):
+        print('\n')
     print('Simulation finished after {} seconds.'.format(int(end_time - start_time)))
     if queue:
         queue.put(False)
@@ -155,6 +166,7 @@ def simulation_process(queue, conn):
             conn.recv()
 
     simulation.bridge.write_detector_output()
+    simulation.bridge.plot_detector_output()
 
     print('\tSimulated {} seconds and {} vehicles, {} veh/h'.
           format(int(simulation.simulated_time), simulation._vehicle_count,

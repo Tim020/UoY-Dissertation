@@ -83,7 +83,8 @@ class Vehicle(object):
         self.lead_vehicle = lead_vehicle
         if lead_vehicle:
             self.gap = self.lead_vehicle.position - self.lead_vehicle.length
-            self.velocity = lead_vehicle.velocity
+            self.velocity = min(self.get_desired_velocity(),
+                                (self.gap / self.get_safetime_headway()))
         else:
             self.gap = Consts.BRIDGE_LENGTH + 100
             self.velocity = self.desired_velocity
@@ -100,7 +101,7 @@ class Vehicle(object):
 
     def get_desired_velocity(self):
         bridge_limit = self._bridge.get_speed_limit(self.lane, self.position)
-        return bridge_limit if bridge_limit else self.desired_velocity
+        return min(bridge_limit, self.desired_velocity) if bridge_limit else self.desired_velocity
 
     def finalise(self):
         if Consts.DEBUG_MODE:

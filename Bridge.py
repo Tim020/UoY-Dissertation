@@ -304,3 +304,11 @@ class Bridge(object):
         for lane in self.space_detectors:
             for detector in lane:
                 detector.write_results()
+
+    def plot_detector_output(self):
+        for lane in self.point_detectors:
+            for detector in lane:
+                detector.plot()
+        for lane in self.space_detectors:
+            for detector in lane:
+                detector.plot()
