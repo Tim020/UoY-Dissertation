@@ -165,9 +165,6 @@ def simulation_process(queue, conn):
         while conn.poll():
             conn.recv()
 
-    simulation.bridge.write_detector_output()
-    simulation.bridge.plot_detector_output()
-
     print('\tSimulated {} seconds and {} vehicles, {} veh/h'.
           format(int(simulation.simulated_time), simulation._vehicle_count,
                  simulation._vehicles_per_hour))
@@ -179,6 +176,12 @@ def simulation_process(queue, conn):
     print('\t[Garage] {} cars, {} trucks, {} truck platoons'.
           format(simulation.garage._cars, simulation.garage._trucks,
                  simulation.garage._truck_platoons))
+
+    print('Writing detector output...')
+    simulation.bridge.write_detector_output()
+    print('Rendering detector graphs...')
+    simulation.bridge.plot_detector_output()
+    print('Finished generating output files')
 
 
 def display_process(queue, conn):
@@ -199,43 +202,40 @@ def display_process(queue, conn):
     display.cleanup()
 
 
-def sink_process(queue):
-    running = True
-    while running:
-        data = queue.get()
-        if type(data) is bool and data is False:
-            running = False
-
-
 if __name__ == '__main__':
-    if os.path.isdir('debug'):
-        print('Removing old debug files')
-        shutil.rmtree('debug')
-    # If there is an argument given, treat it as the seed for the simulation
-    if len(sys.argv) > 1:
-        Consts.SIMULATION_SEED = int(sys.argv[1])
-        Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
+    for i in range(Consts.NUM_RUNS):
+        Consts.generate_seed()
 
-    if not Consts.SINGLE_LANE:
-        Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
+        if os.path.isdir('debug'):
+            print('Removing old debug files')
+            shutil.rmtree('debug')
+        # If there is an argument given, treat it as the seed for the simulation
+        if len(sys.argv) > 1:
+            Consts.SIMULATION_SEED = int(sys.argv[1])
+            Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
 
-    if os.getenv("HEADLESS") is None:
-        processes = []
-        vehicle_queue = Queue()
-        conns = Pipe(True)
-        disp = Process(target=display_process, args=(vehicle_queue,
-                                                     conns[1],))
-        sim = Process(target=simulation_process, args=(vehicle_queue,
-                                                       conns[0],))
+        if not Consts.SINGLE_LANE:
+            Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
 
-        processes.append(sim)
-        processes.append(disp)
+        print("\nStarting run {} of {}".format(i + 1, Consts.NUM_RUNS))
 
-        for process in processes:
-            process.start()
+        if os.getenv("HEADLESS") is None:
+            processes = []
+            vehicle_queue = Queue()
+            conns = Pipe(True)
+            disp = Process(target=display_process, args=(vehicle_queue,
+                                                         conns[1],))
+            sim = Process(target=simulation_process, args=(vehicle_queue,
+                                                           conns[0],))
 
-        for process in processes:
-            process.join()
-    else:
-        Consts.FORCE_DISPLAY_FREQ = False
-        simulation_process(None, None)
+            processes.append(sim)
+            processes.append(disp)
+
+            for process in processes:
+                process.start()
+
+            for process in processes:
+                process.join()
+        else:
+            Consts.FORCE_DISPLAY_FREQ = False
+            simulation_process(None, None)

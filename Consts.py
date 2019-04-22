@@ -1,6 +1,9 @@
 import random
 
-DEBUG_MODE = True
+# The number of simulation runs to do
+NUM_RUNS = 10
+
+DEBUG_MODE = False
 
 # Seed used in this simulation - used to generate IDs of various things
 SIMULATION_SEED = random.getrandbits(128)
@@ -53,3 +56,11 @@ MAX_PLATOON_LENGTH = 10
 # Minumum and maximum gap between trucks in a platoon
 MIN_PLATOON_GAP = 2
 MAX_PLATOON_GAP = 5
+
+
+def generate_seed():
+    global SIMULATION_SEED, SIMULATION_SHORT_SEED
+    # Seed used in this simulation - used to generate IDs of various things
+    SIMULATION_SEED = random.getrandbits(128)
+    # Need a 32 bit seed to use for the numpy random generators
+    SIMULATION_SHORT_SEED = SIMULATION_SEED >> (128 - 32)
