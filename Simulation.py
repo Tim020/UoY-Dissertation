@@ -208,7 +208,7 @@ if __name__ == '__main__':
         Consts.generate_seed()
 
         if os.path.isdir('debug'):
-            print('Removing old debug files')
+            print('Removing old debug files\n')
             shutil.rmtree('debug')
         # If there is an argument given, treat it as the seed for the simulation
         if len(sys.argv) > 1:
@@ -218,7 +218,7 @@ if __name__ == '__main__':
         if not Consts.SINGLE_LANE:
             Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
 
-        print("\nStarting run {} of {}".format(i + 1, Consts.NUM_RUNS))
+        print("Starting run {} of {}".format(i + 1, Consts.NUM_RUNS))
 
         if os.getenv("HEADLESS") is None:
             processes = []

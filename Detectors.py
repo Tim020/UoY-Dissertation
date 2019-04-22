@@ -90,6 +90,7 @@ class Detector(object):
         plt.tight_layout()
         f.set_size_inches(16, 9)
         plt.savefig('output/{}/detectors/{}/{}.png'.format(Consts.SIMULATION_SEED, self.lane, self.get_name()), dpi=300)
+        plt.close(f)
 
 
 class PointDetector(Detector):
