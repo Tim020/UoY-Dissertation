@@ -124,9 +124,8 @@ def get_params():
 
 
 def detector_configuration(simulation_params):
-    answer = input('Would you like to configure point or space detectors? '
-                   '(Y/N): ')
     while True:
+        answer = input('Would you like to configure point or space detectors? (Y/N): ')
         try:
             answer = str2bool(answer)
             break
@@ -134,13 +133,16 @@ def detector_configuration(simulation_params):
             print('Could not understand input, please enter Y or N.')
 
     if answer:
-        num_lanes = simulation_params.get('Number of lanes', 1)
+        num_lanes = simulation_params.get('Number of Lanes', 1)
         if simulation_params['Multi Lane Traffic']:
-            possible_lanes = [str(x) for x in range(num_lanes * 2)]
-            possible_lanes_int = [int(x) for x in range(num_lanes * 2)]
+            possible_lanes_int = []
+            for i in range(num_lanes * 2):
+                lane = i if i < num_lanes else (i * -1) + (num_lanes - 1)
+                possible_lanes_int.append(lane)
+            possible_lanes = [str(x) for x in possible_lanes_int]
         else:
-            possible_lanes = [str(x) for x in range(num_lanes)]
             possible_lanes_int = [int(x) for x in range(num_lanes)]
+            possible_lanes = [str(x) for x in possible_lanes_int]
         possible_lanes.append('all')
 
         prompt_string = ('Options:\n\t'
@@ -256,8 +258,8 @@ def detector_configuration(simulation_params):
 
 
 def configure_speedlimits(simulation_params):
-    answer = input('Would you like to configure speed limited zones? (Y/N): ')
     while True:
+        answer = input('Would you like to configure speed limited zones? (Y/N): ')
         try:
             answer = str2bool(answer)
             break
@@ -265,13 +267,16 @@ def configure_speedlimits(simulation_params):
             print('Could not understand input, please enter Y or N.')
 
     if answer:
-        num_lanes = simulation_params.get('Number of lanes', 1)
+        num_lanes = simulation_params.get('Number of Lanes', 1)
         if simulation_params['Multi Lane Traffic']:
-            possible_lanes = [str(x) for x in range(num_lanes * 2)]
-            possible_lanes_int = [int(x) for x in range(num_lanes * 2)]
+            possible_lanes_int = []
+            for i in range(num_lanes * 2):
+                lane = i if i < num_lanes else (i * -1) + (num_lanes - 1)
+                possible_lanes_int.append(lane)
+            possible_lanes = [str(x) for x in possible_lanes_int]
         else:
-            possible_lanes = [str(x) for x in range(num_lanes)]
             possible_lanes_int = [int(x) for x in range(num_lanes)]
+            possible_lanes = [str(x) for x in possible_lanes_int]
         possible_lanes.append('all')
 
         prompt_string = ('Options:\n\t'
@@ -343,8 +348,8 @@ def configure_speedlimits(simulation_params):
 
 
 def configure_headways(simulation_params):
-    answer = input('Would you like to configure safetime headway zones? (Y/N): ')
     while True:
+        answer = input('Would you like to configure safetime headway zones? (Y/N): ')
         try:
             answer = str2bool(answer)
             break
@@ -352,13 +357,16 @@ def configure_headways(simulation_params):
             print('Could not understand input, please enter Y or N.')
 
     if answer:
-        num_lanes = simulation_params.get('Number of lanes', 1)
+        num_lanes = simulation_params.get('Number of Lanes', 1)
         if simulation_params['Multi Lane Traffic']:
-            possible_lanes = [str(x) for x in range(num_lanes * 2)]
-            possible_lanes_int = [int(x) for x in range(num_lanes * 2)]
+            possible_lanes_int = []
+            for i in range(num_lanes * 2):
+                lane = i if i < num_lanes else (i * -1) + (num_lanes - 1)
+                possible_lanes_int.append(lane)
+            possible_lanes = [str(x) for x in possible_lanes_int]
         else:
-            possible_lanes = [str(x) for x in range(num_lanes)]
             possible_lanes_int = [int(x) for x in range(num_lanes)]
+            possible_lanes = [str(x) for x in possible_lanes_int]
         possible_lanes.append('all')
 
         prompt_string = ('Options:\n\t'
@@ -371,14 +379,10 @@ def configure_headways(simulation_params):
                 print('Invalid option {}'.format(answer))
                 answer = input(prompt_string)
             if answer == '1':
-                lane = input(
-                    'Enter lane for new safetime headway zone. Options are: [{}, {}] or All: '.format(
-                        min(possible_lanes_int), max(possible_lanes_int)))
+                lane = input('Enter lane for new safetime headway zone. Options are: [{}, {}] or All: '.format(min(possible_lanes_int), max(possible_lanes_int)))
                 while lane.lower() not in possible_lanes:
                     print('Invalid option for lane')
-                    lane = input(
-                        'Enter lane for new safetime headway zone. Options are: [{}, {}] or All: '.format(
-                            min(possible_lanes_int), max(possible_lanes_int)))
+                    lane = input('Enter lane for new safetime headway zone. Options are: [{}, {}] or All: '.format(min(possible_lanes_int), max(possible_lanes_int)))
 
                 if lane.lower() != 'all':
                     lane = int(lane)

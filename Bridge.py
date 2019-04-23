@@ -287,11 +287,6 @@ class Bridge(object):
         speedlimits = conf.get('speedlimits')
         self._configure_speedlimits(speedlimits)
 
-        print(self.point_detectors)
-        print(self.space_detectors)
-        print(self.headway_zones)
-        print(self.speed_restricted_zones)
-
     def _configure_detectors(self, detectors):
         for detector in detectors:
             if detector['type'] == 'point':
@@ -309,8 +304,7 @@ class Bridge(object):
                 if detector['lane'] == 'all':
                     self.add_space_detector_all_lanes(start, end, interval)
                 else:
-                    self.add_space_detector(detector['lane'], start, end,
-                                            interval)
+                    self.add_space_detector(detector['lane'], start, end, interval)
             else:
                 raise ValueError('Unknown type: {}'.format(detector['type']))
 
