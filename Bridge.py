@@ -60,22 +60,25 @@ class Bridge(object):
 
     # New vehicles #
 
-    def add_vehicle(self, vehicle):
+    def add_vehicle(self, vehicle, force_lane=None):
         self._calls += 1
         if type(vehicle) is list:
             if not Consts.MULTI_LANE:
                 lane = 0
             else:
-                lane = self._random.randint(0, (self.lanes * 2) - 1)
+                if force_lane:
+                    lane = force_lane
+                else:
+                    lane = self._random.randint(0, (self.lanes * 2) - 1)
             if self.lane_queues[lane]:
-                return False
+                return False, lane
             else:
                 lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
                 if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length >= vehicle[0].minimum_distance) or (lead_vehicle is None)) and not self.lane_queues[lane]):
                     self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
                     self.lane_queues[lane] = vehicle
-                    return True
-                elif Consts.MULTI_LANE:
+                    return True, lane
+                elif Consts.MULTI_LANE and not force_lane:
                     # Could not add to this lane, so go through all lanes and
                     # find the first place we can add this new vehicle to
                     for lane, _ in enumerate(self.vehicles):
@@ -83,22 +86,25 @@ class Bridge(object):
                         if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length >= vehicle[0].minimum_distance) or (lead_vehicle is None)) and not self.lane_queues[lane]):
                             self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
                             self.lane_queues[lane] = vehicle
-                            return True
-                    return False
+                            return True, lane
+                    return False, lane
                 else:
-                    return False
+                    return False, lane
         else:
             if not Consts.MULTI_LANE:
                 lane = 0
             else:
-                lane = self._random.randint(0, (self.lanes * 2) - 1)
+                if force_lane:
+                    lane = force_lane
+                else:
+                    lane = self._random.randint(0, (self.lanes * 2) - 1)
             lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
             if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length
                   >= vehicle.minimum_distance) or (lead_vehicle is None))
                     and not self.lane_queues[lane]):
                 self._add_vehicle(vehicle, lead_vehicle, lane)
-                return True
-            elif Consts.MULTI_LANE:
+                return True, lane
+            elif Consts.MULTI_LANE and not force_lane:
                 # Could not add to this lane, so go through all lanes and find
                 # the first place we can add this new vehicle to
                 for lane, _ in enumerate(self.vehicles):
@@ -109,10 +115,10 @@ class Bridge(object):
                             or (lead_vehicle is None))
                             and not self.lane_queues[lane]):
                         self._add_vehicle(vehicle, lead_vehicle, lane)
-                        return True
-                return False
+                        return True, lane
+                return False, lane
             else:
-                return False
+                return False, lane
 
     def _add_vehicle(self, vehicle, lead_vehicle, lane):
         vehicle.set_lane(lane)

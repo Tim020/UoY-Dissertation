@@ -94,21 +94,29 @@ class Simulation(object):
         self._vehicles_per_hour = 0
         self.last_freq = 0
         self.last_t = 0
+        self.queued_vehicles = []
 
     def update(self, frequency, time_step):
         self.last_t = (Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP)
         while True:
             self.simulated_time += time_step
             if self._next_vehicle_in <= time_step:
-                new_vehicle = self.garage.new_vehicle()
-                if self.bridge.add_vehicle(new_vehicle):
+                lane = None
+                if self.queued_vehicles:
+                    lane, new_vehicle = self.queued_vehicles.pop(0)
+                else:
+                    new_vehicle = self.garage.new_vehicle()
+                status, lane = self.bridge.add_vehicle(new_vehicle, lane)
+                if status:
                     self._vehicle_count += 1
                 else:
                     self._vehicle_failures += 1
-                    pass
+                    self.queued_vehicles.append((lane, new_vehicle))
                 self._next_vehicle_in = self._vehicle_timer
             else:
                 self._next_vehicle_in -= Decimal(time_step)
+
+            assert(len(self.queued_vehicles) <= 1)
 
             self._vehicles_per_hour = int((self._vehicle_count / Decimal(self.simulated_time)) * 3600)
 
