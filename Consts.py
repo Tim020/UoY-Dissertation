@@ -109,7 +109,8 @@ def load_from_json(conf):
     }
     print('Loading configuration from file')
     for param in conf:
-        if DEBUG_MODE:
-            print('Setting {} to {}'.format(params[param], conf[param]))
-        exec('{} = {}'.format(params[param], conf[param]), globals())
+        if param in params:
+            if DEBUG_MODE:
+                print('Setting {} to {}'.format(params[param], conf[param]))
+            exec('{} = {}'.format(params[param], conf[param]), globals())
     print('Loaded configuration from file')

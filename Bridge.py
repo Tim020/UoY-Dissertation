@@ -132,7 +132,8 @@ class Bridge(object):
     # Safetime Headway Zones #
 
     def add_safetime_headway_zone_all_lanes(self, start, end, time):
-        for i in range(self.lanes * 2):
+        r = self.lanes * 2 if Consts.MULTI_LANE else 1
+        for i in range(r):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
                 self.add_safetime_headway_zone(self.length - end,
@@ -141,6 +142,10 @@ class Bridge(object):
                 self.add_safetime_headway_zone(start, end, time, lane)
 
     def add_safetime_headway_zone(self, start, end, time, lane):
+        if not Consts.MULTI_LANE and lane > 0:
+            print('Single lane traffic only, ignoring safetime headway for '
+                  'lane {}'.format(lane))
+            return
         if self.headway_zones[lane]:
             can_add_zone = True
             for zone in self.headway_zones[lane]:
@@ -167,7 +172,8 @@ class Bridge(object):
     # Speed Limited Zones #
 
     def add_speed_limited_zone_all_lanes(self, start, end, speed_limit):
-        for i in range(self.lanes * 2):
+        r = self.lanes * 2 if Consts.MULTI_LANE else 1
+        for i in range(r):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
                 self.add_speed_limited_zone(self.length - end,
@@ -177,6 +183,10 @@ class Bridge(object):
                 self.add_speed_limited_zone(start, end, speed_limit, lane)
 
     def add_speed_limited_zone(self, start, end, speed_limit, lane):
+        if not Consts.MULTI_LANE and lane > 0:
+            print('Single lane traffic only, ignoring speed limit for '
+                  'lane {}'.format(lane))
+            return
         if self.speed_restricted_zones[lane]:
             can_add_zone = True
             for zone in self.speed_restricted_zones[lane]:
@@ -202,7 +212,8 @@ class Bridge(object):
     # Point Detectors #
 
     def add_point_detector_all_lanes(self, position, time_interval):
-        for i in range(self.lanes * 2):
+        r = self.lanes * 2 if Consts.MULTI_LANE else 1
+        for i in range(r):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
                 self.add_point_detector(lane, self.length - position,
@@ -211,6 +222,10 @@ class Bridge(object):
                 self.add_point_detector(lane, position, time_interval)
 
     def add_point_detector(self, lane, position, time_interval):
+        if not Consts.MULTI_LANE and lane > 0:
+            print('Single lane traffic only, ignoring point detector for '
+                  'lane {}'.format(lane))
+            return
         if self.point_detectors[lane]:
             can_add_detector = True
             for detector in self.point_detectors[lane]:
@@ -227,7 +242,8 @@ class Bridge(object):
     # Space Detectors #
 
     def add_space_detector_all_lanes(self, start, end, time_interval):
-        for i in range(self.lanes * 2):
+        r = self.lanes * 2 if Consts.MULTI_LANE else 1
+        for i in range(r):
             lane = i if i < self.lanes else (i * -1) + (self.lanes - 1)
             if lane < 0:
                 self.add_space_detector(lane, self.length - end,
@@ -236,6 +252,10 @@ class Bridge(object):
                 self.add_space_detector(lane, start, end, time_interval)
 
     def add_space_detector(self, lane, start, end, time_interval):
+        if not Consts.MULTI_LANE and lane > 0:
+            print('Single lane traffic only, ignoring space detector for '
+                  'lane {}'.format(lane))
+            return
         if self.space_detectors[lane]:
             can_add_detector = True
             for detector in self.space_detectors[lane]:
@@ -248,6 +268,65 @@ class Bridge(object):
         else:
             self.space_detectors[lane].append(
                 SpaceDetector(lane, start, end, time_interval))
+
+    # Configuration Settings
+
+    def configure(self, conf):
+        detectors = conf.get('detectors')
+        self._configure_detectors(detectors)
+
+        headways = conf.get('headways')
+        self._configure_headways(headways)
+
+        speedlimits = conf.get('speedlimits')
+        self._configure_speedlimits(speedlimits)
+
+        print(self.point_detectors)
+        print(self.space_detectors)
+        print(self.headway_zones)
+        print(self.speed_restricted_zones)
+
+    def _configure_detectors(self, detectors):
+        for detector in detectors:
+            if detector['type'] == 'point':
+                position = detector['position']
+                interval = detector['interval']
+                if detector['lane'] == 'all':
+                    self.add_point_detector_all_lanes(position, interval)
+                else:
+                    self.add_point_detector(detector['lane'], position,
+                                            interval)
+            elif detector['type'] == 'space':
+                start = detector['position_start']
+                end = detector['position_end']
+                interval = detector['interval']
+                if detector['lane'] == 'all':
+                    self.add_space_detector_all_lanes(start, end, interval)
+                else:
+                    self.add_space_detector(detector['lane'], start, end,
+                                            interval)
+            else:
+                raise ValueError('Unknown type: {}'.format(detector['type']))
+
+    def _configure_headways(self, headways):
+        for zone in headways:
+            start = zone['position_start']
+            end = zone['position_end']
+            headway = zone['headway']
+            if zone['lane'] == 'all':
+                self.add_safetime_headway_zone_all_lanes(start, end, headway)
+            else:
+                self.add_safetime_headway_zone(start, end, headway, zone['lane'])
+
+    def _configure_speedlimits(self, speedlimits):
+        for zone in speedlimits:
+            start = zone['position_start']
+            end = zone['position_end']
+            headway = zone['speedlimit']
+            if zone['lane'] == 'all':
+                self.add_speed_limited_zone_all_lanes(start, end, headway)
+            else:
+                self.add_speed_limited_zone(start, end, headway, zone['lane'])
 
     # Simulation update #
 

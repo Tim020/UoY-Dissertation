@@ -55,7 +55,7 @@ import VehicleGarage
 
 
 class Simulation(object):
-    def __init__(self, env, finish_event, queue, conn):
+    def __init__(self, env, finish_event, queue, conn, configuration):
         self.env = env
         self.finish_event = finish_event
         self.queue = queue
@@ -67,11 +67,13 @@ class Simulation(object):
                                     Consts.BRIDGE_LENGTH,
                                     Consts.BRIDGE_LANES,
                                     Consts.SAFETIME_HEADWAY)
+        if configuration:
+            self.bridge.configure(configuration)
         # self.bridge.add_safetime_headway_zone_all_lanes(245, 255, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
-        self.bridge.add_point_detector_all_lanes(150, 10)
-        self.bridge.add_space_detector_all_lanes(100, 200, 10)
+        # self.bridge.add_point_detector_all_lanes(150, 10)
+        # self.bridge.add_space_detector_all_lanes(100, 200, 10)
         # self.bridge.add_space_detector_all_lanes(250, 450, 5)
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
@@ -142,11 +144,11 @@ class Simulation(object):
             yield self.env.timeout(frequency)
 
 
-def simulation_process(queue, conn):
+def simulation_process(queue, conn, configuration):
     print('Starting simulation with seed: {}'.format(Consts.SIMULATION_SEED))
     environment = simpy.RealtimeEnvironment(strict=False)
     finish_event = environment.event()
-    simulation = Simulation(environment, finish_event, queue, conn)
+    simulation = Simulation(environment, finish_event, queue, conn, configuration)
     total_sim_time = Consts.SIMULATION_LENGTH * (
             Consts.SIMULATION_FREQUENCY / Consts.TIME_STEP)
 
@@ -211,6 +213,8 @@ if __name__ == '__main__':
         print('Removing old debug files\n')
         shutil.rmtree('debug')
 
+    config = None
+
     if len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
             f = open(sys.argv[1])
@@ -244,7 +248,8 @@ if __name__ == '__main__':
             disp = Process(target=display_process, args=(vehicle_queue,
                                                          conns[1],))
             sim = Process(target=simulation_process, args=(vehicle_queue,
-                                                           conns[0],))
+                                                           conns[0],
+                                                           config))
 
             processes.append(sim)
             processes.append(disp)
@@ -256,4 +261,4 @@ if __name__ == '__main__':
                 process.join()
         else:
             Consts.FORCE_DISPLAY_FREQ = False
-            simulation_process(None, None)
+            simulation_process(None, None, config)
