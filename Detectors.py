@@ -15,6 +15,16 @@ class Detector(object):
         self.microscopic_data = defaultdict(dict)
         self.macroscopic_data = defaultdict(dict)
 
+        path = 'output/{}{}/detectors/{}'
+
+        if os.path.isdir(path.format(Consts.SIMULATION_SEED, '', self.lane)):
+            counter = 0
+            while os.path.isdir(path.format(Consts.SIMULATION_SEED, ':{}'.format(counter), self.lane)):
+                counter += 1
+            self.path = path.format(Consts.SIMULATION_SEED, ':{}'.format(counter), self.lane)
+        else:
+            self.path = path.format(Consts.SIMULATION_SEED, '', self.lane)
+
     def get_name(self):
         raise NotImplementedError
 
@@ -26,10 +36,8 @@ class Detector(object):
 
     def write_results(self):
         # JSON output
-        os.makedirs('output/{}/detectors/{}'.
-                    format(Consts.SIMULATION_SEED, self.lane), exist_ok=True)
-        _file = open('output/{}/detectors/{}/{}.json'.
-                     format(Consts.SIMULATION_SEED, self.lane, self.get_name()), 'w')
+        os.makedirs(self.path, exist_ok=True)
+        _file = open('{}/{}.json'.format(self.path, self.get_name()), 'w')
         results = {
             'micro': self.microscopic_data,
             'macro': self.macroscopic_data
@@ -38,8 +46,7 @@ class Detector(object):
         _file.close()
 
         # CSV output macroscopic
-        _file = open('output/{}/detectors/{}/{}_macro.csv'.
-                     format(Consts.SIMULATION_SEED, self.lane, self.get_name()), 'w')
+        _file = open('{}/{}_macro.csv'.format(self.path, self.get_name()), 'w')
         csvwriter = csv.writer(_file)
         count = 0
         for d in self.macroscopic_data:
@@ -54,6 +61,7 @@ class Detector(object):
         _file.close()
 
     def plot(self):
+        os.makedirs(self.path, exist_ok=True)
         import matplotlib.pyplot as plt
         from matplotlib import rcParams
         rcParams['axes.titlepad'] = 40
@@ -89,7 +97,7 @@ class Detector(object):
         plt.subplots_adjust(top=0.85)
         plt.tight_layout()
         f.set_size_inches(16, 9)
-        plt.savefig('output/{}/detectors/{}/{}.png'.format(Consts.SIMULATION_SEED, self.lane, self.get_name()), dpi=300)
+        plt.savefig('{}/{}.png'.format(self.path, self.get_name()), dpi=300)
         plt.close(f)
 
 
