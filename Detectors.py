@@ -101,6 +101,19 @@ class Detector(object):
         plt.close(f)
 
 
+def calc_harmonic_mean(data):
+    if type(data) is not list:
+        raise ValueError('Type of data should be list, got {}'.format(type(data)))
+    total = 0
+    for x in data:
+        if x != 0:
+            total += 1/x
+    if total == 0:
+        return 0
+    else:
+        return len(data) / total
+
+
 class PointDetector(Detector):
     def __init__(self, lane, position, time_interval):
         super().__init__(lane, time_interval)
@@ -126,8 +139,7 @@ class PointDetector(Detector):
             self.macroscopic_data[simulated_time] = {
                 'time_mean_velocity': ((sum(self.speeds) / len(self.speeds))
                                        if self.speeds else 0),
-                'space_mean_velocity': ((len(self.speeds) / sum((1/x) for x in self.speeds))
-                                        if self.speeds else 0),
+                'space_mean_velocity': calc_harmonic_mean(self.speeds),
                 'flow': int((3600 / self.time_interval) * self.vehicle_count)
             }
             self.speeds = []
@@ -166,16 +178,14 @@ class SpaceDetector(Detector):
                 vehicle_data = self.in_progress_vehicles.pop(vehicle._id)
 
                 velocities = vehicle_data['velocity']
-                average_velocity = sum(velocities) / len(velocities)
-                space_velocity = len(velocities) / sum((1/x) for x in velocities)
-
                 gaps = vehicle_data['space_headway']
-                average_gap = sum(gaps) / len(gaps)
 
                 self.microscopic_data[vehicle._id] = {
-                    'average_time_mean_velocity': average_velocity,
-                    'average_space_mean_velocity': space_velocity,
-                    'average_space_headway': average_gap
+                    'average_time_mean_velocity': ((sum(velocities) / len(velocities))
+                                                   if velocities else 0),
+                    'average_space_mean_velocity': calc_harmonic_mean(velocities),
+                    'average_space_headway': ((sum(gaps) / len(gaps))
+                                              if gaps else 0)
                 }
 
         if self.next_macro_update <= time_step:
@@ -193,8 +203,7 @@ class SpaceDetector(Detector):
             self.macroscopic_data[simulated_time] = {
                 'time_mean_velocity': ((sum(velocities) / len(velocities))
                                        if velocities else 0),
-                'space_mean_velocity': ((len(velocities) / sum((1/x) for x in velocities))
-                                        if velocities else 0),
+                'space_mean_velocity': calc_harmonic_mean(velocities),
                 'density': ((len(self.in_progress_vehicles) / ((self.end - self.start) / 1000))
                             if self.in_progress_vehicles else 0),
                 'weight_load': sum(weights)
@@ -231,8 +240,7 @@ class BridgeDetector(Detector):
             self.macroscopic_data[simulated_time] = {
                 'time_mean_velocity': ((sum(velocities) / len(velocities))
                                        if velocities else 0),
-                'space_mean_velocity': ((len(velocities) / sum((1 / x) for x in velocities))
-                                        if velocities else 0),
+                'space_mean_velocity': calc_harmonic_mean(velocities),
                 'weight_load': sum(weight_load)
             }
 
