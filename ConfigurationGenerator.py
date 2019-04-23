@@ -3,12 +3,13 @@
 import json
 import os
 import random
+import string
 
 
 def str2bool(v):
-  if v.lower() in ("yes", "true", "t", "1"):
+  if v.lower() in ("yes", "true", "t", "1", "y"):
       return True
-  elif v.lower() in ("no", "false", "f", "0"):
+  elif v.lower() in ("no", "false", "f", "0", "n"):
       return False
   else:
       raise ValueError('Not a recognised boolean value')
@@ -114,15 +115,20 @@ if __name__ == '__main__':
                     '(m)',
             'requires': 'Platoon Percentage',
             'post_expression': 'assert(simulation_params["Maximum Platoon Gap"]>= simulation_params["Minimum Platoon Gap"])'
+        },
+        'Number of Runs': {
+            'itemtype': int,
+            'help': 'The number of runs to perform with this configuration'
         }
     }
-    print('Welcome to the configuration generator for Traffic Simulator 2.0')
+    print('Welcome to the Configuration Generator for Traffic Simulator')
 
     simulation_params = dict()
     seed = random.getrandbits(128)
     short_seed = seed >> (128 - 32)
     simulation_params['Seed'] = seed
     simulation_params['Short Seed'] = short_seed
+    simulation_params['detectors'] = []
 
     for param in params:
         if 'requires' in params[param]:
@@ -150,8 +156,138 @@ if __name__ == '__main__':
                     exec(params[param]['post_expression'])
                 break
 
+    answer = input('Would you like to configure point or space detectors? '
+                   '(Y/N): ')
+    while True:
+        try:
+            answer = str2bool(answer)
+            break
+        except ValueError:
+            print('Could not understand input, please enter Y or N.')
+
+    if answer:
+        num_lanes = simulation_params.get('Number of lanes', 1)
+        if simulation_params['Multi Lane Traffic']:
+            possible_lanes = [str(x) for x in range(num_lanes * 2)]
+            possible_lanes_int = [int(x) for x in range(num_lanes * 2)]
+        else:
+            possible_lanes = [str(x) for x in range(num_lanes)]
+            possible_lanes_int = [int(x) for x in range(num_lanes)]
+        possible_lanes.append('all')
+
+        prompt_string = ('Options:\n\t'
+                         '1 - New point detector\n\t'
+                         '2 - New space detector\n\t'
+                         'Q - Finished\n'
+                         'Enter Option: ')
+        answer = input(prompt_string)
+        while True:
+            while answer.lower() not in ('1', '2', 'q'):
+                print('Invalid option {}'.format(answer))
+                answer = input(prompt_string)
+
+            if answer == '1':
+                lane = input('Enter lane for new point detector. Options are: [{}, {}] or All: '.format(min(possible_lanes_int), max(possible_lanes_int)))
+                while lane.lower() not in possible_lanes:
+                    print('Invalid option for lane')
+                    lane = input('Enter lane for new point detector. Options are: [{}, {}] or All: '.format(min(possible_lanes_int), max(possible_lanes_int)))
+
+                if lane.lower() != 'all':
+                    lane = int(lane)
+                else:
+                    lane = 'all'
+
+                while True:
+                    position = input('Enter position for new point detector. Options are: [{}, {}]: '.format(0, simulation_params['Bridge Length']))
+                    try:
+                        position = int(position)
+                    except ValueError:
+                        print('Invalid option {}. Must be integer type.'.format(position))
+                    else:
+                        if not (position >= 0 and position <=  simulation_params['Bridge Length']):
+                            print('Invalid position {}'.format(position))
+                        else:
+                            break
+
+                while True:
+                    interval = input('Enter macroscopic update interval in seconds: ')
+                    try:
+                        interval = int(interval)
+                    except ValueError:
+                        print('Invalid option {}. Must be integer type.'.format(interval))
+                    else:
+                        break
+
+                simulation_params['detectors'].append({
+                    'type': 'point',
+                    'position': position,
+                    'lane': lane,
+                    'interval': interval
+                })
+            elif answer == '2':
+                lane = input('Enter lane for new space detector. Options are: [{}, {}] or All: '.format(min(possible_lanes_int), max(possible_lanes_int)))
+                while lane.lower() not in possible_lanes:
+                    print('Invalid option for lane')
+                    lane = input('Enter lane for new point detector. Options are: [{}, {}] or All: '.format(min(possible_lanes_int), max(possible_lanes_int)))
+
+                if lane.lower() != 'all':
+                    lane = int(lane)
+                else:
+                    lane = 'all'
+
+                while True:
+                    position_start = input('Enter start position of new space detector. Options are: [{}, {}]: '.format(0, simulation_params['Bridge Length'] - 1))
+                    try:
+                        position_start = int(position_start)
+                    except ValueError:
+                        print('Invalid option {}. Must be integer type.'.format(position_start))
+                    else:
+                        if not (position_start >= 0 and position_start <=  simulation_params['Bridge Length'] - 1):
+                            print('Invalid position {}'.format(position_start))
+                        else:
+                            break
+
+                while True:
+                    position_end = input('Enter end position of new space detector. Options are: [{}, {}]: '.format(position_start + 1, simulation_params['Bridge Length']))
+                    try:
+                        position_end = int(position_end)
+                    except ValueError:
+                        print('Invalid option {}. Must be integer type.'.format(position_end))
+                    else:
+                        if not (position_end >= position_start + 1 and position_end <=  simulation_params['Bridge Length']):
+                            print('Invalid position {}'.format(position_start))
+                        else:
+                            break
+
+                while True:
+                    interval = input('Enter macroscopic update interval in seconds: ')
+                    try:
+                        interval = int(interval)
+                    except ValueError:
+                        print('Invalid option {}. Must be integer type.'.format(interval))
+                    else:
+                        break
+
+                simulation_params['detectors'].append({
+                    'type': 'space',
+                    'position_start': position_start,
+                    'position_end': position_end,
+                    'lane': lane,
+                    'interval': interval
+                })
+            elif answer.lower() == 'q':
+                break
+
+            answer = input(prompt_string)
+
+    # Space - start, end, interval, lane
+    # Point - position, interval, lane
+
     name = input('Enter file name to save the configuration to '
                  '(should end in .json): ')
+    if not name:
+        name = ''.join(random.choices(string.ascii_uppercase + string.digits,
+                                      k=6))
     if not name.endswith('.json'):
         name = name + '.json'
     name = 'configs/' + name
@@ -160,5 +296,3 @@ if __name__ == '__main__':
     f.write(json.dumps(simulation_params, indent=4, sort_keys=True))
     f.close()
     print('Saved configuration file to: {}'.format(name))
-
-

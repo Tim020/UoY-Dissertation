@@ -160,7 +160,7 @@ def simulation_process(queue, conn):
     environment.run(until=finish_event)
     end_time = time.time()
     if os.getenv("HEADLESS"):
-        print('\n')
+        print('\r')
     print('Simulation finished after {} seconds.'.format(int(end_time - start_time)))
     if queue:
         queue.put(False)
@@ -218,31 +218,42 @@ if __name__ == '__main__':
             f.close()
             Consts.load_from_json(config)
         else:
-            Consts.SIMULATION_SEED = int(sys.argv[1])
-            Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
+            try:
+                Consts.SIMULATION_SEED = int(sys.argv[1])
+                Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
+            except ValueError:
+                print('Argument was neither a file nor an integer. '
+                      'Not sure what to do here, so exiting!')
+                sys.exit(1)
+
+    Consts.configure_random()
 
     if Consts.MULTI_LANE:
         Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
 
-    # print("Starting run {} of {}".format(i + 1, Consts.NUM_RUNS))
+    for i in range(Consts.NUM_RUNS):
+        if i != 0:
+            Consts.generate_seed()
 
-    if os.getenv("HEADLESS") is None:
-        processes = []
-        vehicle_queue = Queue()
-        conns = Pipe(True)
-        disp = Process(target=display_process, args=(vehicle_queue,
-                                                     conns[1],))
-        sim = Process(target=simulation_process, args=(vehicle_queue,
-                                                       conns[0],))
+        print("\nStarting run {} of {}".format(i + 1, Consts.NUM_RUNS))
 
-        processes.append(sim)
-        processes.append(disp)
+        if os.getenv("HEADLESS") is None:
+            processes = []
+            vehicle_queue = Queue()
+            conns = Pipe(True)
+            disp = Process(target=display_process, args=(vehicle_queue,
+                                                         conns[1],))
+            sim = Process(target=simulation_process, args=(vehicle_queue,
+                                                           conns[0],))
 
-        for process in processes:
-            process.start()
+            processes.append(sim)
+            processes.append(disp)
 
-        for process in processes:
-            process.join()
-    else:
-        Consts.FORCE_DISPLAY_FREQ = False
-        simulation_process(None, None)
+            for process in processes:
+                process.start()
+
+            for process in processes:
+                process.join()
+        else:
+            Consts.FORCE_DISPLAY_FREQ = False
+            simulation_process(None, None)

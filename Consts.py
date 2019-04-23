@@ -1,5 +1,7 @@
 import random
 
+_random = None
+
 # The number of simulation runs to do
 NUM_RUNS = 1
 
@@ -60,15 +62,26 @@ MIN_PLATOON_GAP = 2
 MAX_PLATOON_GAP = 5
 
 
+def configure_random():
+    global _random
+    _random = random.Random(SIMULATION_SEED)
+
+
 def generate_seed():
-    global SIMULATION_SEED, SIMULATION_SHORT_SEED
+    global SIMULATION_SEED, SIMULATION_SHORT_SEED, _random
+
+    if not _random:
+        print('_random has not been configured. Calling configure_random before generating a new seed')
+        configure_random()
+
     # Seed used in this simulation - used to generate IDs of various things
-    SIMULATION_SEED = random.getrandbits(128)
+    SIMULATION_SEED = _random.getrandbits(128)
     # Need a 32 bit seed to use for the numpy random generators
     SIMULATION_SHORT_SEED = SIMULATION_SEED >> (128 - 32)
 
 
 def load_from_json(conf):
+    global DEBUG_MODE
     params = {
         'Seed': 'SIMULATION_SEED',
         'Short Seed': 'SIMULATION_SHORT_SEED',
@@ -91,10 +104,12 @@ def load_from_json(conf):
         'Minimum Platoon Length': 'MIN_PLATOON_LENGTH',
         'Maximum Platoon Length': 'MAX_PLATOON_LENGTH',
         'Minimum Platoon Gap': 'MIN_PLATOON_GAP',
-        'Maximum Platoon Gap': 'MAX_PLATOON_GAP'
+        'Maximum Platoon Gap': 'MAX_PLATOON_GAP',
+        'Number of Runs': 'NUM_RUNS'
     }
     print('Loading configuration from file')
     for param in conf:
-        print('Setting {} to {}'.format(params[param], conf[param]))
+        if DEBUG_MODE:
+            print('Setting {} to {}'.format(params[param], conf[param]))
         exec('{} = {}'.format(params[param], conf[param]), globals())
     print('Loaded configuration from file')
