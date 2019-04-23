@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import random
 
 
@@ -35,6 +36,10 @@ if __name__ == '__main__':
             'itemtype': int,
             'help': 'Length of the bridge to simulate (m)'
         },
+        'Safetime Headway': {
+            'itemtype': float,
+            'help': 'Default safetime headway for the bridge'
+        },
         'Multi Lane Traffic': {
             'itemtype': bool,
             'help': 'Whether to simulate only a single lane of traffic (False), '
@@ -54,13 +59,13 @@ if __name__ == '__main__':
         'Truck Percentage': {
             'itemtype': int,
             'help': 'The percentage distribution of trucks in the overall traffic',
-            'post_expression': 'simulation_params["Car percentage"] = 100 - '
+            'post_expression': 'simulation_params["Car Percentage"] = 100 - '
                                'simulation_params["Truck Percentage"]'
         },
         'Car v0': {
             'itemtype': int,
             'help': 'Desired speed for cars (m/s)',
-            'requires': 'Car percentage'
+            'requires': 'Car Percentage'
         },
         'Truck v0': {
             'itemtype': int,
@@ -149,6 +154,8 @@ if __name__ == '__main__':
                  '(should end in .json): ')
     if not name.endswith('.json'):
         name = name + '.json'
+    name = 'configs/' + name
+    os.makedirs('configs', exist_ok=True)
     f = open(name, 'w')
     f.write(json.dumps(simulation_params, indent=4, sort_keys=True))
     f.close()

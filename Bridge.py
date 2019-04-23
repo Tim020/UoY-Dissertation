@@ -63,7 +63,7 @@ class Bridge(object):
     def add_vehicle(self, vehicle):
         self._calls += 1
         if type(vehicle) is list:
-            if Consts.SINGLE_LANE:
+            if not Consts.MULTI_LANE:
                 lane = 0
             else:
                 lane = self._random.randint(0, (self.lanes * 2) - 1)
@@ -75,7 +75,7 @@ class Bridge(object):
                     self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
                     self.lane_queues[lane] = vehicle
                     return True
-                elif not Consts.SINGLE_LANE:
+                elif Consts.MULTI_LANE:
                     # Could not add to this lane, so go through all lanes and
                     # find the first place we can add this new vehicle to
                     for lane, _ in enumerate(self.vehicles):
@@ -85,8 +85,10 @@ class Bridge(object):
                             self.lane_queues[lane] = vehicle
                             return True
                     return False
+                else:
+                    return False
         else:
-            if Consts.SINGLE_LANE:
+            if not Consts.MULTI_LANE:
                 lane = 0
             else:
                 lane = self._random.randint(0, (self.lanes * 2) - 1)
@@ -96,7 +98,7 @@ class Bridge(object):
                     and not self.lane_queues[lane]):
                 self._add_vehicle(vehicle, lead_vehicle, lane)
                 return True
-            elif not Consts.SINGLE_LANE:
+            elif Consts.MULTI_LANE:
                 # Could not add to this lane, so go through all lanes and find
                 # the first place we can add this new vehicle to
                 for lane, _ in enumerate(self.vehicles):
@@ -108,6 +110,8 @@ class Bridge(object):
                             and not self.lane_queues[lane]):
                         self._add_vehicle(vehicle, lead_vehicle, lane)
                         return True
+                return False
+            else:
                 return False
 
     def _add_vehicle(self, vehicle, lead_vehicle, lane):

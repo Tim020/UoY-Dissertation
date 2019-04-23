@@ -76,7 +76,7 @@ class Detector(object):
             axarr[count % 2, count // 2].plot(timestamps, data_points[plot])
             axarr[count % 2, count // 2].set_xlabel('Time (s)')
             axarr[count % 2, count // 2].set_ylabel(self.get_plot_labels()[plot])
-            axarr[count % 2, count // 2].grid(True)
+            axarr[count % 2, count // 2].grid(False)
             count += 1
 
         if count != math.pow(math.ceil(len(data_keys) / 2), 2):

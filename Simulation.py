@@ -40,6 +40,7 @@ Motivation needed to complete this project, go Charmander!
 '''
 
 from decimal import *
+import json
 from multiprocessing import Process, Queue, Pipe
 import os
 import shutil
@@ -64,7 +65,8 @@ class Simulation(object):
                                               Consts.TIME_STEP))
         self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED,
                                     Consts.BRIDGE_LENGTH,
-                                    Consts.BRIDGE_LANES, 1)
+                                    Consts.BRIDGE_LANES,
+                                    Consts.SAFETIME_HEADWAY)
         # self.bridge.add_safetime_headway_zone_all_lanes(245, 255, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
@@ -204,39 +206,43 @@ def display_process(queue, conn):
 
 
 if __name__ == '__main__':
-    for i in range(Consts.NUM_RUNS):
-        Consts.generate_seed()
 
-        if os.path.isdir('debug'):
-            print('Removing old debug files\n')
-            shutil.rmtree('debug')
-        # If there is an argument given, treat it as the seed for the simulation
-        if len(sys.argv) > 1:
+    if os.path.isdir('debug'):
+        print('Removing old debug files\n')
+        shutil.rmtree('debug')
+
+    if len(sys.argv) > 1:
+        if os.path.isfile(sys.argv[1]):
+            f = open(sys.argv[1])
+            config = json.loads(f.read())
+            f.close()
+            Consts.load_from_json(config)
+        else:
             Consts.SIMULATION_SEED = int(sys.argv[1])
             Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
 
-        if not Consts.SINGLE_LANE:
-            Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
+    if Consts.MULTI_LANE:
+        Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
 
-        print("Starting run {} of {}".format(i + 1, Consts.NUM_RUNS))
+    # print("Starting run {} of {}".format(i + 1, Consts.NUM_RUNS))
 
-        if os.getenv("HEADLESS") is None:
-            processes = []
-            vehicle_queue = Queue()
-            conns = Pipe(True)
-            disp = Process(target=display_process, args=(vehicle_queue,
-                                                         conns[1],))
-            sim = Process(target=simulation_process, args=(vehicle_queue,
-                                                           conns[0],))
+    if os.getenv("HEADLESS") is None:
+        processes = []
+        vehicle_queue = Queue()
+        conns = Pipe(True)
+        disp = Process(target=display_process, args=(vehicle_queue,
+                                                     conns[1],))
+        sim = Process(target=simulation_process, args=(vehicle_queue,
+                                                       conns[0],))
 
-            processes.append(sim)
-            processes.append(disp)
+        processes.append(sim)
+        processes.append(disp)
 
-            for process in processes:
-                process.start()
+        for process in processes:
+            process.start()
 
-            for process in processes:
-                process.join()
-        else:
-            Consts.FORCE_DISPLAY_FREQ = False
-            simulation_process(None, None)
+        for process in processes:
+            process.join()
+    else:
+        Consts.FORCE_DISPLAY_FREQ = False
+        simulation_process(None, None)
