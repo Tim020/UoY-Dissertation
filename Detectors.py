@@ -254,3 +254,28 @@ class BridgeDetector(Detector):
             'space_mean_velocity': 'Space Mean Velocity (m/s)',
             'weight_load': 'Weight Load (kg)'
         }
+
+    def write_results(self):
+        # JSON output
+        os.makedirs(self.path, exist_ok=True)
+        _file = open('{}/{}.json'.format(self.path, self.get_name()), 'w')
+        results = {
+            'macro': self.macroscopic_data
+        }
+        _file.write(json.dumps(results))
+        _file.close()
+
+        # CSV output macroscopic
+        _file = open('{}/{}_macro.csv'.format(self.path, self.get_name()), 'w')
+        csvwriter = csv.writer(_file)
+        count = 0
+        for d in self.macroscopic_data:
+            data = self.macroscopic_data[d]
+            data['timestamp'] = d
+            if count == 0:
+                header = data.keys()
+                csvwriter.writerow(header)
+                count += 1
+            csvwriter.writerow(data.values())
+            del data['timestamp']
+        _file.close()
