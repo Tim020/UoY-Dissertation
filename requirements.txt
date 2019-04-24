@@ -1,0 +1,5 @@
+simpy
+matplotlib
+numpy
+scipy
+faker
