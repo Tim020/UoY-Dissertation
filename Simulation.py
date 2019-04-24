@@ -228,6 +228,39 @@ def display_process(queue, conn):
 
 
 if __name__ == '__main__':
+    def run_simulation():
+        Consts.configure_random()
+
+        if Consts.MULTI_LANE:
+            Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
+
+        for i in range(Consts.NUM_RUNS):
+            if i != 0:
+                Consts.generate_seed()
+
+            print("\nStarting run {} of {}".format(i + 1, Consts.NUM_RUNS))
+
+            if os.getenv("HEADLESS") is None:
+                processes = []
+                vehicle_queue = Queue()
+                conns = Pipe(True)
+                disp = Process(target=display_process, args=(vehicle_queue,
+                                                             conns[1],))
+                sim = Process(target=simulation_process, args=(vehicle_queue,
+                                                               conns[0],
+                                                               config))
+
+                processes.append(sim)
+                processes.append(disp)
+
+                for process in processes:
+                    process.start()
+
+                for process in processes:
+                    process.join()
+            else:
+                Consts.FORCE_DISPLAY_FREQ = False
+                simulation_process(None, None, config)
 
     if os.path.isdir('debug'):
         print('Removing old debug files\n')
@@ -236,49 +269,17 @@ if __name__ == '__main__':
     config = None
 
     if len(sys.argv) > 1:
-        if os.path.isfile(sys.argv[1]):
-            f = open(sys.argv[1])
-            config = json.loads(f.read())
-            f.close()
-            Consts.load_from_json(config)
-        else:
-            try:
-                Consts.SIMULATION_SEED = int(sys.argv[1])
-                Consts.SIMULATION_SHORT_SEED = Consts.SIMULATION_SEED >> (128 - 32)
-            except ValueError:
-                print('Argument was neither a file nor an integer. '
-                      'Not sure what to do here, so exiting!')
-                sys.exit(1)
-
-    Consts.configure_random()
-
-    if Consts.MULTI_LANE:
-        Consts.INFLOW_RATE = Consts.INFLOW_RATE * Consts.BRIDGE_LANES * 2
-
-    for i in range(Consts.NUM_RUNS):
-        if i != 0:
-            Consts.generate_seed()
-
-        print("\nStarting run {} of {}".format(i + 1, Consts.NUM_RUNS))
-
-        if os.getenv("HEADLESS") is None:
-            processes = []
-            vehicle_queue = Queue()
-            conns = Pipe(True)
-            disp = Process(target=display_process, args=(vehicle_queue,
-                                                         conns[1],))
-            sim = Process(target=simulation_process, args=(vehicle_queue,
-                                                           conns[0],
-                                                           config))
-
-            processes.append(sim)
-            processes.append(disp)
-
-            for process in processes:
-                process.start()
-
-            for process in processes:
-                process.join()
-        else:
-            Consts.FORCE_DISPLAY_FREQ = False
-            simulation_process(None, None, config)
+        for arg in sys.argv[1:]:
+            if os.path.isfile(arg):
+                f = open(arg)
+                config = json.loads(f.read())
+                f.close()
+                print('\nStarting simulation with config: {}'.format(arg))
+                Consts.load_from_json(config)
+                run_simulation()
+            else:
+                print('Argument was not a file. Not sure what to do here, '
+                      'so skipping argument: {}!'.format(arg))
+                continue
+    else:
+        run_simulation()
