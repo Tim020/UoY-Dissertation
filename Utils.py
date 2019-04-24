@@ -9,5 +9,7 @@ class MixtureModel(rv_continuous):
     def rvs(self, size):
         submodel_choices = self._random_state.randint(len(self.submodels), size=size)
         submodel_samples = [submodel.rvs(size=size) for submodel in self.submodels]
-        rvs = self._random_state.choose(submodel_choices, submodel_samples)
+        rvs = []
+        for i in submodel_choices:
+            rvs.append(self._random_state.choice(submodel_samples[i]))
         return rvs

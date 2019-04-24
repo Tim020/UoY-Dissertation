@@ -33,6 +33,7 @@ class Garage(object):
         self._truck_unloaded_weights = None
         self._truck_loaded_weights = None
         self._truck_weights = None
+        self._generated_truck_weights = []
 
         self._platoon_pct = platoon_chance
         self._min_platoon_length = min_platoon_length
@@ -150,7 +151,7 @@ class Garage(object):
         loaded_max = (1 + (loaded_variance / 100))
 
         if unloaded_variance > 0:
-            unloaded_std = ((unloaded_weight * unloaded_min) - (unloaded_weight * unloaded_max)) / 4
+            unloaded_std = ((unloaded_weight * unloaded_max) - (unloaded_weight * unloaded_min)) / 4
             self._truck_unloaded_weights = stats.truncnorm(
                 ((unloaded_weight * unloaded_min) - unloaded_weight) / unloaded_std,
                 ((unloaded_weight * unloaded_max) - unloaded_weight) / unloaded_std,
@@ -165,7 +166,7 @@ class Garage(object):
             seed=self._short_seed)
 
         if loaded_variance > 0:
-            loaded_std = ((loaded_weight * loaded_min) - (loaded_weight * loaded_max)) / 4
+            loaded_std = ((loaded_weight * loaded_max) - (loaded_weight * loaded_min)) / 4
             self._truck_loaded_weights = stats.truncnorm(
                 ((loaded_weight * loaded_min) - loaded_weight) / loaded_std,
                 ((loaded_weight * loaded_max) - loaded_weight) / loaded_std,
@@ -211,11 +212,13 @@ class Garage(object):
                 self._truck_platoons += 1
             else:
                 gap = float(self._truck_gaps.rvs(1)[0])
+                weight = float(self._truck_weights.rvs(1)[0])
                 new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 0.73,
-                                    1.67, gap, self._truck_length, IDM, 44000)
+                                    1.67, gap, self._truck_length, IDM, weight)
                 self._trucks += 1
                 self._generated_truck_velocities.append(vel)
                 self._generated_truck_gaps.append(gap)
+                self._generated_truck_weights.append(weight)
 
         if Consts.DEBUG_MODE:
             if type(new_vehicle) is not list:
@@ -230,7 +233,7 @@ class Garage(object):
         from matplotlib import rcParams
         rcParams['axes.titlepad'] = 40
 
-        f, axarr = plt.subplots(2, 2, squeeze=False)
+        f, axarr = plt.subplots(2, 3, squeeze=False)
 
         if self._generated_car_velocities:
             axarr[0, 0].hist(self._generated_car_velocities, density=True, ec="k")
@@ -248,6 +251,10 @@ class Garage(object):
             axarr[1, 1].hist(self._generated_truck_gaps, density=True, ec="k")
             axarr[1, 1].set_xlabel('Desired Truck Minimum Gap (m)')
             axarr[1, 1].set_ylabel('Density')
+        if self._generated_truck_weights:
+            axarr[1, 2].hist(self._generated_truck_weights, density=True, ec="k")
+            axarr[1, 2].set_xlabel('Truck Wights (m)')
+            axarr[1, 2].set_ylabel('Density')
 
         f.suptitle('Data from Vehicle Generation', fontsize=12, y=0.99)
         plt.subplots_adjust(top=0.85)
