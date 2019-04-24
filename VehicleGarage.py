@@ -184,18 +184,23 @@ class Garage(object):
         rcParams['axes.titlepad'] = 40
 
         f, axarr = plt.subplots(2, 2, squeeze=False)
-        axarr[0, 0].hist(self._generated_car_velocities, density=True, ec="k")
-        axarr[0, 0].set_xlabel('Desired Car Velocity (m/s)')
-        axarr[0, 0].set_ylabel('Density')
-        axarr[0, 1].hist(self._generated_car_gaps, density=True, ec="k")
-        axarr[0, 1].set_xlabel('Desired Car Minimum Gap (m)')
-        axarr[0, 1].set_ylabel('Density')
-        axarr[1, 0].hist(self._generated_truck_velocities, density=True, ec="k")
-        axarr[1, 0].set_xlabel('Desired Truck Velocity (m/s)')
-        axarr[1, 0].set_ylabel('Density')
-        axarr[1, 1].hist(self._generated_truck_gaps, density=True, ec="k")
-        axarr[1, 1].set_xlabel('Desired Truck Minimum Gap (m)')
-        axarr[1, 1].set_ylabel('Density')
+
+        if self._generated_car_velocities:
+            axarr[0, 0].hist(self._generated_car_velocities, density=True, ec="k")
+            axarr[0, 0].set_xlabel('Desired Car Velocity (m/s)')
+            axarr[0, 0].set_ylabel('Density')
+        if self._generated_car_gaps:
+            axarr[0, 1].hist(self._generated_car_gaps, density=True, ec="k")
+            axarr[0, 1].set_xlabel('Desired Car Minimum Gap (m)')
+            axarr[0, 1].set_ylabel('Density')
+        if self._generated_truck_velocities:
+            axarr[1, 0].hist(self._generated_truck_velocities, density=True, ec="k")
+            axarr[1, 0].set_xlabel('Desired Truck Velocity (m/s)')
+            axarr[1, 0].set_ylabel('Density')
+        if self._generated_truck_gaps:
+            axarr[1, 1].hist(self._generated_truck_gaps, density=True, ec="k")
+            axarr[1, 1].set_xlabel('Desired Truck Minimum Gap (m)')
+            axarr[1, 1].set_ylabel('Density')
 
         f.suptitle('Data from Vehicle Generation', fontsize=12, y=0.99)
         plt.subplots_adjust(top=0.85)

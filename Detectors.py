@@ -66,6 +66,9 @@ class Detector(object):
         from matplotlib import rcParams
         rcParams['axes.titlepad'] = 40
 
+        if not list(self.macroscopic_data.keys()):
+            return
+
         k = list(self.macroscopic_data.keys())[0]
         data_keys = list(self.macroscopic_data[k].keys())
         f, axarr = plt.subplots(math.ceil(len(data_keys) / 2),
