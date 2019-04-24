@@ -30,6 +30,10 @@ TRUCK_PCT = 20
 # Chance that when a truck is added to the road, it will be a platoon
 PLATOON_CHANCE = 0
 
+# Lengths of the vehicles in m
+CAR_LENGTH = 4
+TRUCK_LENGTH = 12
+
 # Minimum distance to enforce between vehicles
 CAR_MINIMUM_GAP = 2
 TRUCK_MINIMUM_GAP = 2
@@ -109,6 +113,8 @@ def load_from_json(conf):
         'Inflow Rate': 'INFLOW_RATE',
         'Truck Percentage': 'TRUCK_PCT',
         'Car Percentage': 'CAR_PCT',
+        'Car Length': 'CAR_LENGTH',
+        'Truck Length': 'TRUCK_LENGTH',
         'Car v0': 'CAR_SPEED',
         'Truck v0': 'TRUCK_SPEED',
         'Car Speed Variance': 'CAR_SPEED_VARIANCE',

@@ -78,6 +78,8 @@ class Simulation(object):
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
                                            Consts.CAR_PCT, Consts.TRUCK_PCT,
+                                           Consts.CAR_LENGTH,
+                                           Consts.TRUCK_LENGTH,
                                            Consts.PLATOON_CHANCE,
                                            Consts.MIN_PLATOON_LENGTH,
                                            Consts.MAX_PLATOON_LENGTH,

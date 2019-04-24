@@ -10,21 +10,23 @@ from Vehicle import Car, Truck, PlatoonedTruck
 
 
 class Garage(object):
-    def __init__(self, seed, short_seed, car_pct, truck_pct,
-                 platoon_chance, min_platoon_length, max_platoon_length,
-                 min_platoon_gap, max_platoon_gap):
+    def __init__(self, seed, short_seed, car_pct, truck_pct, car_length,
+                 truck_length, platoon_chance, min_platoon_length,
+                 max_platoon_length, min_platoon_gap, max_platoon_gap):
         self._seed = seed
         self._short_seed = short_seed
         
         self._car_pct = car_pct
         self._car_velocities = None
         self._car_gaps = None
+        self._car_length = car_length
         self._generated_car_velocities = []
         self._generated_car_gaps = []
 
         self._truck_pct = truck_pct
         self._truck_velocities = None
         self._truck_gaps = None
+        self._truck_length = truck_length
         self._generated_truck_velocities = []
         self._generated_truck_gaps = []
 
@@ -140,7 +142,7 @@ class Garage(object):
             vel = float(self._car_velocities.rvs(1)[0])
             gap = float(self._car_gaps.rvs(1)[0])
             new_vehicle = Car(self._uuid_generator.uuid4(), vel, 0.73, 1.67,
-                              gap, 4, IDM, 2000)
+                              gap, self._car_length, IDM, 2000)
             self._cars += 1
             self._generated_car_velocities.append(vel)
             self._generated_car_gaps.append(gap)
@@ -155,14 +157,15 @@ class Garage(object):
                 for i in range(platoon_length):
                     new_vehicle.append(
                         PlatoonedTruck(self._uuid_generator.uuid4(), vel,
-                                       0.73, 1.67, 2, 12, TruckPlatoon,
-                                       44000, i == 0, platoon_gap))
+                                       0.73, 1.67, 2, self._truck_length,
+                                       TruckPlatoon, 44000, i == 0,
+                                       platoon_gap))
                     self._trucks += 1
                 self._truck_platoons += 1
             else:
                 gap = float(self._truck_gaps.rvs(1)[0])
                 new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 0.73,
-                                    1.67, gap, 12, IDM, 44000)
+                                    1.67, gap, self._truck_length, IDM, 44000)
                 self._trucks += 1
                 self._generated_truck_velocities.append(vel)
                 self._generated_truck_gaps.append(gap)

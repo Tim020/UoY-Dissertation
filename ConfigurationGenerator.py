@@ -61,6 +61,18 @@ def get_params():
             'post_expression': 'simulation_params["Car Percentage"] = 100 - '
                                'simulation_params["Truck Percentage"]'
         },
+        'Car Length': {
+            'itemtype': int,
+            'help': 'Length of cars (m)',
+            'requires': 'Car Percentage',
+            'validation': 'answer > 0'
+        },
+        'Truck Length': {
+            'itemtype': int,
+            'help': 'Length of trucks (m)',
+            'requires': 'Truck Percentage',
+            'validation': 'answer > 0'
+        },
         'Car v0': {
             'itemtype': int,
             'help': 'Desired speed for cars (m/s)',
