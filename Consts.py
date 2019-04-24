@@ -70,6 +70,14 @@ TRUCK_SPEED_VARIANCE = 10
 CAR_SPEED_DISTRIBUTION = 0
 TRUCK_SPEED_DISTRIBUTION = 0
 
+# Unloaded and loaded weights of trucks
+TRUCK_UNLOADED_WEIGHT = 20000
+TRUCK_LOADED_WEIGHT = 50000
+
+# Percentage of weights the distribution should go between ± for trucks
+TRUCK_UNLOADED_WEIGHT_VARIANCE = 10
+TRUCK_LOADED_WEIGHT_VARIANCE = 10
+
 # Minimum and maximum number of trucks allowed in a platoon
 MIN_PLATOON_LENGTH = 2
 MAX_PLATOON_LENGTH = 10
@@ -121,6 +129,10 @@ def load_from_json(conf):
         'Truck Speed Variance': 'TRUCK_SPEED_VARIANCE',
         'Car Speed Distribution': 'CAR_SPEED_DISTRIBUTION',
         'Truck Speed Distribution': 'TRUCK_SPEED_DISTRIBUTION',
+        'Truck Unloaded Weight': 'TRUCK_UNLOADED_WEIGHT',
+        'Truck Loaded Weight': 'TRUCK_LOADED_WEIGHT',
+        'Truck Unloaded Weight Variance': 'TRUCK_UNLOADED_WEIGHT_VARIANCE',
+        'Truck Loaded Weight Variance': 'TRUCK_LOADED_WEIGHT_VARIANCE',
         'Platoon Percentage': 'PLATOON_CHANCE',
         'Minimum Platoon Length': 'MIN_PLATOON_LENGTH',
         'Maximum Platoon Length': 'MAX_PLATOON_LENGTH',

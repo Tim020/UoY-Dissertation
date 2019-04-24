@@ -155,6 +155,34 @@ def get_params():
             'requires': 'Truck Minimum Gap Variance',
             'validation': 'answer in [0, 1]'
         },
+        'Truck Unloaded Weight': {
+            'itemtype': int,
+            'help': 'Average unloaded weight for trucks (kg)',
+            'requires': 'Truck Percentage',
+            'validation': 'answer > 0'
+        },
+        'Truck Loaded Weight': {
+            'itemtype': int,
+            'help': 'Average loaded weight for trucks (kg)',
+            'requires': 'Truck Percentage',
+            'validation': 'answer >= simulation_params["Truck Unloaded Weight"]'
+        },
+        'Truck Unloaded Weight Variance': {
+            'itemtype': int,
+            'help': 'Percentage of unloaded weight the distribution should '
+                    'vary between for trucks',
+
+            'requires': 'Truck Percentage',
+            'validation': 'answer >= 0 and answer <= 99'
+        },
+        'Truck Loaded Weight Variance': {
+            'itemtype': int,
+            'help': 'Percentage of loaded weight the distribution should vary '
+                    'between for trucks',
+
+            'requires': 'Truck Percentage',
+            'validation': 'answer >= 0 and answer <= 99'
+        },
         'Platoon Percentage': {
             'itemtype': int,
             'help': 'The percentage of Automated Truck Platoons in the overall '
