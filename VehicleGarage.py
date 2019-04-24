@@ -16,20 +16,22 @@ class Garage(object):
         self._car_pct = car_pct
         car_min = (1 - (car_speed_variance / 100))
         car_max = (1 + (car_speed_variance / 100))
+        car_std = ((car_speed * car_max) - (car_speed * car_min)) / 4
         self._car_velocities = stats.truncnorm(
-            ((car_speed * car_min) - car_speed) / 4,
-            ((car_speed * car_max) - car_speed) / 4,
-            loc=car_speed, scale=4)
+            ((car_speed * car_min) - car_speed) / car_std,
+            ((car_speed * car_max) - car_speed) / car_std,
+            loc=car_speed, scale=car_std)
         self._car_velocities.random_state = np.random.RandomState(
             seed=short_seed)
 
         self._truck_pct = truck_pct
         truck_min = (1 - (truck_speed_variance / 100))
         truck_max = (1 + (truck_speed_variance / 100))
+        truck_std = ((truck_speed * truck_max) - (truck_speed * truck_min)) / 4
         self._truck_velocities = stats.truncnorm(
-            ((truck_speed * truck_min) - truck_speed) / 4,
-            ((truck_speed * truck_max) - truck_speed) / 4,
-            loc=truck_speed, scale=4)
+            ((truck_speed * truck_min) - truck_speed) / truck_std,
+            ((truck_speed * truck_max) - truck_speed) / truck_std,
+            loc=truck_speed, scale=truck_std)
         self._truck_velocities.random_state = np.random.RandomState(
             seed=short_seed)
 
