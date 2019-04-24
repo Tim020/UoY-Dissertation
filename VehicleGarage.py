@@ -6,6 +6,7 @@ import scipy.stats as stats
 
 import Consts
 from DriverModel import IDM, TruckPlatoon
+from Utils import MixtureModel
 from Vehicle import Car, Truck, PlatoonedTruck
 
 
@@ -29,6 +30,9 @@ class Garage(object):
         self._truck_length = truck_length
         self._generated_truck_velocities = []
         self._generated_truck_gaps = []
+        self._truck_unloaded_weights = None
+        self._truck_loaded_weights = None
+        self._truck_weights = None
 
         self._platoon_pct = platoon_chance
         self._min_platoon_length = min_platoon_length
@@ -135,6 +139,49 @@ class Garage(object):
             raise RuntimeError('Could not configure truck minimum gaps with '
                                'the given settings!')
         self._truck_gaps.random_state = np.random.RandomState(
+            seed=self._short_seed)
+
+    def configure_truck_weights(self, unloaded_weight, loaded_weight,
+                                unloaded_variance, loaded_variance):
+        unloaded_min = (1 - (unloaded_variance / 100))
+        unloaded_max = (1 + (unloaded_variance / 100))
+
+        loaded_min = (1 - (loaded_variance / 100))
+        loaded_max = (1 + (loaded_variance / 100))
+
+        if unloaded_variance > 0:
+            unloaded_std = ((unloaded_weight * unloaded_min) - (unloaded_weight * unloaded_max)) / 4
+            self._truck_unloaded_weights = stats.truncnorm(
+                ((unloaded_weight * unloaded_min) - unloaded_weight) / unloaded_std,
+                ((unloaded_weight * unloaded_max) - unloaded_weight) / unloaded_std,
+                loc=unloaded_weight, scale=unloaded_std
+            )
+        else:
+            self._truck_unloaded_weights = stats.uniform(
+                loc=(unloaded_weight * unloaded_min),
+                scale=(unloaded_weight * unloaded_max) - unloaded_weight
+            )
+        self._truck_unloaded_weights.random_state = np.random.RandomState(
+            seed=self._short_seed)
+
+        if loaded_variance > 0:
+            loaded_std = ((loaded_weight * loaded_min) - (loaded_weight * loaded_max)) / 4
+            self._truck_loaded_weights = stats.truncnorm(
+                ((loaded_weight * loaded_min) - loaded_weight) / loaded_std,
+                ((loaded_weight * loaded_max) - loaded_weight) / loaded_std,
+                loc=loaded_weight, scale=loaded_std
+            )
+        else:
+            self._truck_loaded_weights = stats.uniform(
+                loc=(loaded_weight * loaded_min),
+                scale=(loaded_weight * loaded_max) - loaded_weight
+            )
+        self._truck_loaded_weights.random_state = np.random.RandomState(
+            seed=self._short_seed)
+
+        self._truck_weights = MixtureModel([self._truck_unloaded_weights,
+                                            self._truck_loaded_weights])
+        self._truck_weights.random_state = np.random.RandomState(
             seed=self._short_seed)
 
     def new_vehicle(self):

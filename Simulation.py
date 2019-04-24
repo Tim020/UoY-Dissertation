@@ -97,6 +97,10 @@ class Simulation(object):
         self.garage.configure_truck_gaps(Consts.TRUCK_MINIMUM_GAP,
                                          Consts.TRUCK_GAP_VARIANCE,
                                          Consts.TRUCK_GAP_DISTRIBUTION)
+        self.garage.configure_truck_weights(Consts.TRUCK_UNLOADED_WEIGHT,
+                                            Consts.TRUCK_LOADED_WEIGHT,
+                                            Consts.TRUCK_UNLOADED_WEIGHT_VARIANCE,
+                                            Consts.TRUCK_LOADED_WEIGHT_VARIANCE)
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)
         self._vehicle_count = Decimal(0)
         self._next_vehicle_in = Decimal(0)
