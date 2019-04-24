@@ -78,23 +78,23 @@ class Simulation(object):
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
                                            Consts.CAR_PCT, Consts.TRUCK_PCT,
-                                           Consts.CAR_SPEED,
-                                           Consts.TRUCK_SPEED,
-                                           Consts.CAR_SPEED_VARIANCE,
-                                           Consts.TRUCK_SPEED_VARIANCE,
                                            Consts.PLATOON_CHANCE,
                                            Consts.MIN_PLATOON_LENGTH,
                                            Consts.MAX_PLATOON_LENGTH,
                                            Consts.MIN_PLATOON_GAP,
-                                           Consts.MAX_PLATOON_GAP,
-                                           Consts.CAR_SPEED_DISTRIBUTION,
-                                           Consts.TRUCK_SPEED_DISTRIBUTION,
-                                           Consts.CAR_MINIMUM_GAP,
-                                           Consts.TRUCK_MINIMUM_GAP,
-                                           Consts.CAR_GAP_VARIANCE,
-                                           Consts.TRUCK_GAP_VARIANCE,
-                                           Consts.CAR_GAP_DISTRIBUTION,
-                                           Consts.TRUCK_GAP_DISTRIBUTION)
+                                           Consts.MAX_PLATOON_GAP)
+        self.garage.configure_car_velocities(Consts.CAR_SPEED,
+                                             Consts.CAR_SPEED_VARIANCE,
+                                             Consts.CAR_SPEED_DISTRIBUTION)
+        self.garage.configure_car_gaps(Consts.CAR_MINIMUM_GAP,
+                                       Consts.CAR_GAP_VARIANCE,
+                                       Consts.CAR_GAP_DISTRIBUTION)
+        self.garage.configure_truck_velocities(Consts.TRUCK_SPEED,
+                                               Consts.TRUCK_SPEED_VARIANCE,
+                                               Consts.TRUCK_SPEED_DISTRIBUTION)
+        self.garage.configure_truck_gaps(Consts.TRUCK_MINIMUM_GAP,
+                                         Consts.TRUCK_GAP_VARIANCE,
+                                         Consts.TRUCK_GAP_DISTRIBUTION)
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)
         self._vehicle_count = Decimal(0)
         self._next_vehicle_in = Decimal(0)
@@ -202,6 +202,8 @@ def simulation_process(queue, conn, configuration):
     simulation.bridge.write_detector_output()
     print('Rendering detector graphs...')
     simulation.bridge.plot_detector_output()
+    print('Rendering vehicle garage graphs...')
+    simulation.garage.plot()
     print('Finished generating output files')
 
 
