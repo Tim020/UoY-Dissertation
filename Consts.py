@@ -53,6 +53,10 @@ TRUCK_SPEED = 22
 CAR_SPEED_VARIANCE = 20
 TRUCK_SPEED_VARIANCE = 10
 
+# Distribution type for car and truck velocities. 0 = normal, 1 = uniform
+CAR_SPEED_DISTRIBUTION = 0
+TRUCK_SPEED_DISTRIBUTION = 0
+
 # Minimum and maximum number of trucks allowed in a platoon
 MIN_PLATOON_LENGTH = 2
 MAX_PLATOON_LENGTH = 10
@@ -100,6 +104,8 @@ def load_from_json(conf):
         'Truck v0': 'TRUCK_SPEED',
         'Car Speed Variance': 'CAR_SPEED_VARIANCE',
         'Truck Speed Variance': 'TRUCK_SPEED_VARIANCE',
+        'Car Speed Distribution': 'CAR_SPEED_DISTRIBUTION',
+        'Truck Speed Distribution': 'TRUCK_SPEED_DISTRIBUTION',
         'Platoon Percentage': 'PLATOON_CHANCE',
         'Minimum Platoon Length': 'MIN_PLATOON_LENGTH',
         'Maximum Platoon Length': 'MAX_PLATOON_LENGTH',

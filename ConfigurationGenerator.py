@@ -86,6 +86,20 @@ def get_params():
 
             'requires': 'Truck v0'
         },
+        'Car Speed Distribution': {
+            'itemtype': int,
+            'help': 'Distribution to use for car velocities. 0 = normal, '
+                    '1 = uniform',
+            'requires': 'Car Speed Variance',
+            'validation': [0, 1]
+        },
+        'Truck Speed Distribution': {
+            'itemtype': int,
+            'help': 'Distribution to use for truck velocities. 0 = normal, '
+                    '1 = uniform',
+            'requires': 'Truck Speed Variance',
+            'validation': [0, 1]
+        },
         'Platoon Percentage': {
             'itemtype': int,
             'help': 'The percentage of Automated Truck Platoons in the overall '
@@ -471,6 +485,12 @@ if __name__ == '__main__':
                 print('Type was not correct for {}, should be {}'.format(param, t))
                 answer = input('Please enter the value again: ')
             else:
+                if 'validation' in params[param]:
+                    if answer not in params[param]['validation']:
+                        print('Value {} was not permitted, should be in {}'.
+                              format(answer, params[param]['validation']))
+                        answer = input('Please enter the value again: ')
+                        continue
                 simulation_params[param] = answer
                 if 'post_expression' in params[param]:
                     exec(params[param]['post_expression'])

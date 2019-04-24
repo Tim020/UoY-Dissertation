@@ -12,36 +12,43 @@ class Garage(object):
     def __init__(self, seed, short_seed, car_pct, truck_pct, car_speed,
                  truck_speed, car_speed_variance, truck_speed_variance,
                  platoon_chance, min_platoon_length, max_platoon_length,
-                 min_platoon_gap, max_platoon_gap):
+                 min_platoon_gap, max_platoon_gap, car_speed_dist,
+                 truck_speed_dist):
         self._car_pct = car_pct
         car_min = (1 - (car_speed_variance / 100))
         car_max = (1 + (car_speed_variance / 100))
-        if car_speed_variance > 0:
+        if car_speed_variance > 0 and car_speed_dist == 0:
             car_std = ((car_speed * car_max) - (car_speed * car_min)) / 4
             self._car_velocities = stats.truncnorm(
                 ((car_speed * car_min) - car_speed) / car_std,
                 ((car_speed * car_max) - car_speed) / car_std,
                 loc=car_speed, scale=car_std)
-        else:
+        elif car_speed_variance == 0 or car_speed_dist == 1:
             self._car_velocities = stats.uniform(
                 loc=(car_speed * car_min),
                 scale=(car_speed * car_max) - car_speed)
+        else:
+            raise RuntimeError('Could not configure car velocities with the '
+                               'given settings!')
         self._car_velocities.random_state = np.random.RandomState(
             seed=short_seed)
 
         self._truck_pct = truck_pct
         truck_min = (1 - (truck_speed_variance / 100))
         truck_max = (1 + (truck_speed_variance / 100))
-        if truck_speed_variance > 0:
+        if truck_speed_variance > 0 and truck_speed_dist == 0:
             truck_std = ((truck_speed * truck_max) - (truck_speed * truck_min)) / 4
             self._truck_velocities = stats.truncnorm(
                 ((truck_speed * truck_min) - truck_speed) / truck_std,
                 ((truck_speed * truck_max) - truck_speed) / truck_std,
                 loc=truck_speed, scale=truck_std)
-        else:
+        elif truck_speed_variance == 0 or truck_speed_dist == 1:
             self._truck_velocities = stats.uniform(
                 loc=(truck_speed * truck_min),
                 scale=(truck_speed * truck_max) - truck_speed)
+        else:
+            raise RuntimeError('Could not configure truck velocities with the '
+                               'given settings!')
         self._truck_velocities.random_state = np.random.RandomState(
             seed=short_seed)
 
