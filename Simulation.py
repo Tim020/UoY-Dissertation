@@ -88,7 +88,13 @@ class Simulation(object):
                                            Consts.MIN_PLATOON_GAP,
                                            Consts.MAX_PLATOON_GAP,
                                            Consts.CAR_SPEED_DISTRIBUTION,
-                                           Consts.TRUCK_SPEED_DISTRIBUTION)
+                                           Consts.TRUCK_SPEED_DISTRIBUTION,
+                                           Consts.CAR_MINIMUM_GAP,
+                                           Consts.TRUCK_MINIMUM_GAP,
+                                           Consts.CAR_GAP_VARIANCE,
+                                           Consts.TRUCK_GAP_VARIANCE,
+                                           Consts.CAR_GAP_DISTRIBUTION,
+                                           Consts.TRUCK_GAP_DISTRIBUTION)
         self._vehicle_timer = Decimal((60 * 60) / Consts.INFLOW_RATE)
         self._vehicle_count = Decimal(0)
         self._next_vehicle_in = Decimal(0)

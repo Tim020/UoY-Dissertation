@@ -13,44 +13,81 @@ class Garage(object):
                  truck_speed, car_speed_variance, truck_speed_variance,
                  platoon_chance, min_platoon_length, max_platoon_length,
                  min_platoon_gap, max_platoon_gap, car_speed_dist,
-                 truck_speed_dist):
+                 truck_speed_dist, car_gap, truck_gap, car_gap_variance,
+                 truck_gap_variance, car_gap_dist, truck_gap_dist):
         self._car_pct = car_pct
-        car_min = (1 - (car_speed_variance / 100))
-        car_max = (1 + (car_speed_variance / 100))
+        car_min_speed = (1 - (car_speed_variance / 100))
+        car_max_speed = (1 + (car_speed_variance / 100))
         if car_speed_variance > 0 and car_speed_dist == 0:
-            car_std = ((car_speed * car_max) - (car_speed * car_min)) / 4
+            car_std_speed = ((car_speed * car_max_speed) - (car_speed * car_min_speed)) / 4
             self._car_velocities = stats.truncnorm(
-                ((car_speed * car_min) - car_speed) / car_std,
-                ((car_speed * car_max) - car_speed) / car_std,
-                loc=car_speed, scale=car_std)
+                ((car_speed * car_min_speed) - car_speed) / car_std_speed,
+                ((car_speed * car_max_speed) - car_speed) / car_std_speed,
+                loc=car_speed, scale=car_std_speed)
         elif car_speed_variance == 0 or car_speed_dist == 1:
             self._car_velocities = stats.uniform(
-                loc=(car_speed * car_min),
-                scale=(car_speed * car_max) - car_speed)
+                loc=(car_speed * car_min_speed),
+                scale=(car_speed * car_max_speed) - car_speed)
         else:
             raise RuntimeError('Could not configure car velocities with the '
                                'given settings!')
         self._car_velocities.random_state = np.random.RandomState(
             seed=short_seed)
 
+        car_min_gap = (1 - (car_gap_variance / 100))
+        car_max_gap = (1 + (car_gap_variance / 100))
+        if car_gap_variance > 0 and car_gap_dist == 0:
+            car_std_gap = ((car_gap * car_max_gap) - (car_gap * car_min_gap)) / 4
+            self._car_gaps = stats.truncnorm(
+                ((car_gap * car_min_gap) - car_gap) / car_std_gap,
+                ((car_gap * car_max_gap) - car_gap) / car_std_gap,
+                loc=car_gap, scale=car_std_gap
+            )
+        elif car_gap_variance == 0 or car_gap_dist == 1:
+            self._car_gaps = stats.uniform(
+                loc=(car_gap * car_min_gap),
+                scale=(car_gap * car_max_gap) - car_gap)
+        else:
+            raise RuntimeError('Could not configure car minimum gaps with the '
+                               'given settings!')
+        self._car_gaps.random_state = np.random.RandomState(seed=short_seed)
+
         self._truck_pct = truck_pct
-        truck_min = (1 - (truck_speed_variance / 100))
-        truck_max = (1 + (truck_speed_variance / 100))
+        truck_min_speed = (1 - (truck_speed_variance / 100))
+        truck_max_speed = (1 + (truck_speed_variance / 100))
         if truck_speed_variance > 0 and truck_speed_dist == 0:
-            truck_std = ((truck_speed * truck_max) - (truck_speed * truck_min)) / 4
+            truck_std_speed = ((truck_speed * truck_max_speed) - (truck_speed * truck_min_speed)) / 4
             self._truck_velocities = stats.truncnorm(
-                ((truck_speed * truck_min) - truck_speed) / truck_std,
-                ((truck_speed * truck_max) - truck_speed) / truck_std,
-                loc=truck_speed, scale=truck_std)
+                ((truck_speed * truck_min_speed) - truck_speed) / truck_std_speed,
+                ((truck_speed * truck_max_speed) - truck_speed) / truck_std_speed,
+                loc=truck_speed, scale=truck_std_speed)
         elif truck_speed_variance == 0 or truck_speed_dist == 1:
             self._truck_velocities = stats.uniform(
-                loc=(truck_speed * truck_min),
-                scale=(truck_speed * truck_max) - truck_speed)
+                loc=(truck_speed * truck_min_speed),
+                scale=(truck_speed * truck_max_speed) - truck_speed)
         else:
             raise RuntimeError('Could not configure truck velocities with the '
                                'given settings!')
         self._truck_velocities.random_state = np.random.RandomState(
             seed=short_seed)
+
+        truck_min_gap = (1 - (truck_gap_variance / 100))
+        truck_max_gap = (1 + (truck_gap_variance / 100))
+        if truck_gap_variance > 0 and truck_gap_dist == 0:
+            truck_std_gap = ((truck_gap * truck_max_gap) - (truck_gap * truck_min_gap)) / 4
+            self._truck_gaps = stats.truncnorm(
+                ((truck_gap * truck_min_gap) - truck_gap) / truck_std_gap,
+                ((truck_gap * truck_max_gap) - truck_gap) / truck_std_gap,
+                loc=truck_gap, scale=truck_std_gap
+            )
+        elif truck_gap_variance == 0 or truck_gap_dist == 1:
+            self._truck_gaps = stats.uniform(
+                loc=(truck_gap * truck_min_gap),
+                scale=(truck_gap * truck_max_gap) - truck_gap)
+        else:
+            raise RuntimeError('Could not configure truck minimum gaps with '
+                               'the given settings!')
+        self._truck_gaps.random_state = np.random.RandomState(seed=short_seed)
 
         self._platoon_pct = platoon_chance
         self._min_platoon_length = min_platoon_length
@@ -72,8 +109,9 @@ class Garage(object):
     def new_vehicle(self):
         if self._random.randint(0, 100) < self._car_pct:
             vel = float(self._car_velocities.rvs(1)[0])
+            gap = float(self._car_gaps.rvs(1)[0])
             new_vehicle = Car(self._uuid_generator.uuid4(), vel, 0.73, 1.67,
-                              2, 4, IDM, 2000)
+                              gap, 4, IDM, 2000)
             self._cars += 1
         else:
             vel = float(self._truck_velocities.rvs(1)[0])
@@ -91,8 +129,9 @@ class Garage(object):
                     self._trucks += 1
                 self._truck_platoons += 1
             else:
+                gap = float(self._truck_gaps.rvs(1)[0])
                 new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 0.73,
-                                    1.67, 2, 12, IDM, 44000)
+                                    1.67, gap, 12, IDM, 44000)
                 self._trucks += 1
 
         if Consts.DEBUG_MODE:

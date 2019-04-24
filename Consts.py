@@ -31,7 +31,16 @@ TRUCK_PCT = 20
 PLATOON_CHANCE = 0
 
 # Minimum distance to enforce between vehicles
-MINUMUM_GAP = 2
+CAR_MINIMUM_GAP = 2
+TRUCK_MINIMUM_GAP = 2
+
+# Percentage of minimum gap the distribution should go between ± for vehicles
+CAR_GAP_VARIANCE = 10
+TRUCK_GAP_VARIANCE = 10
+
+# Distribution type for car and truck minimum gaps. 0 = normal, 1 = uniform
+CAR_GAP_DISTRIBUTION = 0
+TRUCK_GAP_DISTRIBUTION = 0
 
 # Length of the bridge for the simulation
 BRIDGE_LENGTH = 1000
@@ -111,7 +120,13 @@ def load_from_json(conf):
         'Maximum Platoon Length': 'MAX_PLATOON_LENGTH',
         'Minimum Platoon Gap': 'MIN_PLATOON_GAP',
         'Maximum Platoon Gap': 'MAX_PLATOON_GAP',
-        'Number of Runs': 'NUM_RUNS'
+        'Number of Runs': 'NUM_RUNS',
+        'Car Minimum Gap': 'CAR_MINIMUM_GAP',
+        'Truck Minimum Gap': 'TRUCK_MINIMUM_GAP',
+        'Car Minimum Gap Variance': 'CAR_GAP_VARIANCE',
+        'Truck Minimum Gap Variance': 'TRUCK_GAP_VARIANCE',
+        'Car Minimum Gap Distribution': 'CAR_GAP_DISTRIBUTION',
+        'Truck Minimum Gap Distribution': 'TRUCK_GAP_DISTRIBUTION',
     }
     print('Loading configuration from file')
     for param in conf:

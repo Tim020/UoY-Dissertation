@@ -29,10 +29,6 @@ def get_params():
             'itemtype': float,
             'help': 'How much time passes in each simulation update'
         },
-        'Minimum Gap': {
-            'itemtype': int,
-            'help': 'Minimum distance to enforce between vehicles (m)'
-        },
         'Bridge Length': {
             'itemtype': int,
             'help': 'Length of the bridge to simulate (m)'
@@ -55,84 +51,135 @@ def get_params():
         'Inflow Rate': {
             'itemtype': int,
             'help': 'Number of vehicles per hour injected into the system '
-                    '(per lane)'
+                    '(per lane)',
+            'validation': 'answer > 0'
         },
         'Truck Percentage': {
             'itemtype': int,
             'help': 'The percentage distribution of trucks in the overall traffic',
+            'validation': 'answer >= 0 and answer <= 100',
             'post_expression': 'simulation_params["Car Percentage"] = 100 - '
                                'simulation_params["Truck Percentage"]'
         },
         'Car v0': {
             'itemtype': int,
             'help': 'Desired speed for cars (m/s)',
-            'requires': 'Car Percentage'
+            'requires': 'Car Percentage',
+            'validation': 'answer > 0'
         },
         'Truck v0': {
             'itemtype': int,
             'help': 'Desired speed for trucks (m/s)',
-            'requires': 'Truck Percentage'
+            'requires': 'Truck Percentage',
+            'validation': 'answer > 0'
         },
         'Car Speed Variance': {
             'itemtype': int,
             'help': 'Percentage of mean speed the distribution should vary between'
                     ' for cars',
-            'requires': 'Car v0'
+            'requires': 'Car v0',
+            'validation': 'answer >= 0 and answer <= 99'
         },
         'Truck Speed Variance': {
             'itemtype': int,
             'help': 'Percentage of mean speed the distribution should vary between'
                     ' for trucks',
 
-            'requires': 'Truck v0'
+            'requires': 'Truck v0',
+            'validation': 'answer >= 0 and answer <= 99'
         },
         'Car Speed Distribution': {
             'itemtype': int,
             'help': 'Distribution to use for car velocities. 0 = normal, '
                     '1 = uniform',
             'requires': 'Car Speed Variance',
-            'validation': [0, 1]
+            'validation': 'answer in [0, 1]'
         },
         'Truck Speed Distribution': {
             'itemtype': int,
             'help': 'Distribution to use for truck velocities. 0 = normal, '
                     '1 = uniform',
             'requires': 'Truck Speed Variance',
-            'validation': [0, 1]
+            'validation': 'answer in [0, 1]'
+        },
+        'Car Minimum Gap': {
+            'itemtype': int,
+            'help': 'Minimum distance cars keep in front of them (m)',
+            'requires': 'Car Percentage',
+            'validation': 'answer > 0'
+        },
+        'Truck Minimum Gap': {
+            'itemtype': int,
+            'help': 'Minimum distance trucks keep in front of them (m)',
+            'requires': 'Truck Percentage',
+            'validation': 'answer > 0'
+        },
+        'Car Minimum Gap Variance': {
+            'itemtype': int,
+            'help': 'Percentage of minimum gap the distribution should vary '
+                    'between for cars',
+            'requires': 'Car Minimum Gap',
+            'validation': 'answer >= 0 and answer <= 99'
+        },
+        'Truck Minimum Gap Variance': {
+            'itemtype': int,
+            'help': 'Percentage of minimum gap the distribution should vary '
+                    'between for trucks',
+
+            'requires': 'Truck Minimum Gap',
+            'validation': 'answer >= 0 and answer <= 99'
+        },
+        'Car Minimum Gap Distribution': {
+            'itemtype': int,
+            'help': 'Distribution to use for car velocities. 0 = normal, '
+                    '1 = uniform',
+            'requires': 'Car Minimum Gap Variance',
+            'validation': 'answer in [0, 1]'
+        },
+        'Truck Minimum Gap Distribution': {
+            'itemtype': int,
+            'help': 'Distribution to use for truck velocities. 0 = normal, '
+                    '1 = uniform',
+            'requires': 'Truck Minimum Gap Variance',
+            'validation': 'answer in [0, 1]'
         },
         'Platoon Percentage': {
             'itemtype': int,
             'help': 'The percentage of Automated Truck Platoons in the overall '
                     'truck traffic',
-            'requires': 'Truck Percentage'
+            'requires': 'Truck Percentage',
+            'validation': 'answer >= 0 and answer <= 100'
         },
         'Minimum Platoon Length': {
             'itemtype': int,
             'help': 'Minimum number of vehicles in an Automated Truck Platoon',
-            'requires': 'Platoon Percentage'
+            'requires': 'Platoon Percentage',
+            'validation': 'answer > 0'
         },
         'Maximum Platoon Length': {
             'itemtype': int,
             'help': 'Maximum number of vehicles in an Automated Truck Platoon',
             'requires': 'Platoon Percentage',
-            'post_expression': 'assert(simulation_params["Maximum Platoon Length"]>= simulation_params["Minimum Platoon Length"])'
+            'validation': 'answer >= simulation_params["Minimum Platoon Length"]',
         },
         'Minimum Platoon Gap': {
             'itemtype': int,
             'help': 'Minimum gap between vehicles in an Automated Truck Platoon '
                     '(m)',
-            'requires': 'Platoon Percentage'
+            'requires': 'Platoon Percentage',
+            'validation': 'answer > 0'
         },
         'Maximum Platoon Gap': {
             'itemtype': int,
             'help': 'Maximum gap between vehicles in an Automated Truck Platoon '
                     '(m)',
             'requires': 'Platoon Percentage',
-            'post_expression': 'assert(simulation_params["Maximum Platoon Gap"]>= simulation_params["Minimum Platoon Gap"])'
+            'validation': 'answer >= simulation_params["Minimum Platoon Gap"]',
         },
         'Number of Runs': {
             'itemtype': int,
-            'help': 'The number of runs to perform with this configuration'
+            'help': 'The number of runs to perform with this configuration',
+            'validation': 'answer > 0'
         }
     }
 
@@ -486,9 +533,11 @@ if __name__ == '__main__':
                 answer = input('Please enter the value again: ')
             else:
                 if 'validation' in params[param]:
-                    if answer not in params[param]['validation']:
-                        print('Value {} was not permitted, should be in {}'.
-                              format(answer, params[param]['validation']))
+                    validation = eval(params[param]['validation'])
+                    if not validation:
+                        print('Value {} was not permitted, validation reads '
+                              '"{}"'.format(answer,
+                                            params[param]['validation']))
                         answer = input('Please enter the value again: ')
                         continue
                 simulation_params[param] = answer

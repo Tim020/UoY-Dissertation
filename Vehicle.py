@@ -108,8 +108,9 @@ class Vehicle(object):
             self._file.close()
 
     def __str__(self):
-        return '{}({}, {})'.format(self._label, self._id,
-                                   self.desired_velocity)
+        return '{}({}, {}, {}, {})'.format(self._label, self._id,
+                                           self.desired_velocity,
+                                           self.minimum_distance, self.weight)
 
 
 class Car(Vehicle):

@@ -33,7 +33,7 @@ class IDM(DriverModel):
         acceleration = math.pow(
             (vehicle.velocity / vehicle.get_desired_velocity()), 4)
         deceleration = math.pow(IDM.calc_desired_gap(vehicle) / vehicle.gap, 2)
-        return vehicle.max_acceleration * (1 - acceleration - deceleration)
+        return float(vehicle.max_acceleration * (1 - acceleration - deceleration))
 
     @staticmethod
     def calc_desired_gap(vehicle):
@@ -45,17 +45,18 @@ class IDM(DriverModel):
         c = ((vehicle.get_safetime_headway() * pv) +
              ((pv * (pv - lpv)) / (2 * math.sqrt(
                  vehicle.max_acceleration * vehicle.max_deceleration))))
-        return vehicle.minimum_distance + max(0, c)
+        ret = float(vehicle.minimum_distance + max(0, c))
+        return ret
 
     @staticmethod
     def calc_velocity(vehicle):
         new_velocity = IDM.calc_raw_velocity(vehicle)
-        return max(0, new_velocity)
+        return float(max(0, new_velocity))
 
     @staticmethod
     def calc_raw_velocity(vehicle):
-        return vehicle.velocity + (IDM.calc_acceleration(vehicle) *
-                                   Consts.TIME_STEP)
+        return float(vehicle.velocity + (IDM.calc_acceleration(vehicle) *
+                                         Consts.TIME_STEP))
 
     @staticmethod
     def calc_position(vehicle):
@@ -68,45 +69,46 @@ class IDM(DriverModel):
                             (vehicle.velocity * Consts.TIME_STEP) +
                             (0.5 * IDM.calc_acceleration(vehicle) *
                              math.pow(Consts.TIME_STEP, 2)))
-        return new_position
+        return float(new_position)
 
     @staticmethod
     def calc_gap(vehicle):
         if vehicle.lead_vehicle:
-            return (vehicle.lead_vehicle.position -
-                    IDM.calc_position(vehicle) - vehicle.lead_vehicle.length)
+            return float(vehicle.lead_vehicle.position -
+                         IDM.calc_position(vehicle) -
+                         vehicle.lead_vehicle.length)
         else:
-            return Consts.BRIDGE_LENGTH + 100
+            return float(Consts.BRIDGE_LENGTH + 100)
 
 
 class TruckPlatoon(DriverModel):
     @staticmethod
     def calc_acceleration(vehicle):
         if vehicle.is_leader:
-            return IDM.calc_acceleration(vehicle)
+            return float(IDM.calc_acceleration(vehicle))
         else:
-            return TruckPlatoon.calc_acceleration(vehicle.lead_vehicle)
+            return float(TruckPlatoon.calc_acceleration(vehicle.lead_vehicle))
 
     @staticmethod
     def calc_velocity(vehicle):
         if vehicle.is_leader:
-            return IDM.calc_velocity(vehicle)
+            return float(IDM.calc_velocity(vehicle))
         else:
-            return TruckPlatoon.calc_velocity(vehicle.lead_vehicle)
+            return float(TruckPlatoon.calc_velocity(vehicle.lead_vehicle))
 
     @staticmethod
     def calc_position(vehicle):
         if vehicle.is_leader:
-            return IDM.calc_position(vehicle)
+            return float(IDM.calc_position(vehicle))
         else:
-            return (TruckPlatoon.calc_position(vehicle.lead_vehicle) -
-                    vehicle.lead_vehicle.length - vehicle.follow_distance)
+            return float(TruckPlatoon.calc_position(vehicle.lead_vehicle) -
+                         vehicle.lead_vehicle.length - vehicle.follow_distance)
 
     @staticmethod
     def calc_gap(vehicle):
         if vehicle.lead_vehicle:
-            return (vehicle.lead_vehicle.position -
-                    TruckPlatoon.calc_position(vehicle) -
-                    vehicle.lead_vehicle.length)
+            return float(vehicle.lead_vehicle.position -
+                         TruckPlatoon.calc_position(vehicle) -
+                         vehicle.lead_vehicle.length)
         else:
-            return Consts.BRIDGE_LENGTH + 100
+            return float(Consts.BRIDGE_LENGTH + 100)
