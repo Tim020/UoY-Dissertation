@@ -54,6 +54,11 @@ def get_params():
                     '(per lane)',
             'validation': 'answer > 0'
         },
+        'Minimum Injection Gap': {
+            'itemtype': float,
+            'help': 'The minimum gap (m) to enforce between vehicles at injection',
+            'validation': 'answer > 0 and answer < simulation_params["Bridge Length"]'
+        },
         'Truck Percentage': {
             'itemtype': int,
             'help': 'The percentage distribution of trucks in the overall traffic',

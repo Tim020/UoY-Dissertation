@@ -86,6 +86,8 @@ MAX_PLATOON_LENGTH = 10
 MIN_PLATOON_GAP = 2
 MAX_PLATOON_GAP = 5
 
+MINIMUM_INJECTION_GAP = 15
+
 
 def configure_random():
     global _random
@@ -113,7 +115,7 @@ def load_from_json(conf):
         'Simulation Update Frequency': 'SIMULATION_FREQUENCY',
         'Simulation Length': 'SIMULATION_LENGTH',
         'Simulation Time Step': 'TIME_STEP',
-        'Minimum Gap': 'MINUMUM_GAP',
+        'Minimum Injection Gap': 'MINIMUM_INJECTION_GAP',
         'Bridge Length': 'BRIDGE_LENGTH',
         'Safetime Headway': 'SAFETIME_HEADWAY',
         'Multi Lane Traffic': 'MULTI_LANE',

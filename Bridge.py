@@ -74,7 +74,7 @@ class Bridge(object):
                 return False, lane
             else:
                 lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
-                if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length >= vehicle[0].minimum_distance) or (lead_vehicle is None)) and not self.lane_queues[lane]):
+                if self._can_add_to_lane(lane, lead_vehicle, vehicle[0]):
                     self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
                     self.lane_queues[lane] = vehicle
                     return True, lane
@@ -83,7 +83,7 @@ class Bridge(object):
                     # find the first place we can add this new vehicle to
                     for lane, _ in enumerate(self.vehicles):
                         lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
-                        if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length >= vehicle[0].minimum_distance) or (lead_vehicle is None)) and not self.lane_queues[lane]):
+                        if self._can_add_to_lane(lane, lead_vehicle, vehicle[0]):
                             self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
                             self.lane_queues[lane] = vehicle
                             return True, lane
@@ -99,9 +99,7 @@ class Bridge(object):
                 else:
                     lane = self._random.randint(0, (self.lanes * 2) - 1)
             lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
-            if (((lead_vehicle and lead_vehicle.position - lead_vehicle.length
-                  >= vehicle.minimum_distance) or (lead_vehicle is None))
-                    and not self.lane_queues[lane]):
+            if self._can_add_to_lane(lane, lead_vehicle, vehicle):
                 self._add_vehicle(vehicle, lead_vehicle, lane)
                 return True, lane
             elif Consts.MULTI_LANE and not force_lane:
@@ -110,15 +108,24 @@ class Bridge(object):
                 for lane, _ in enumerate(self.vehicles):
                     lead_vehicle = self.vehicles[lane][-1] if self.vehicles[
                         lane] else None
-                    if (((lead_vehicle and lead_vehicle.position -
-                         lead_vehicle.length >= vehicle.minimum_distance)
-                            or (lead_vehicle is None))
-                            and not self.lane_queues[lane]):
+                    if self._can_add_to_lane(lane, lead_vehicle, vehicle):
                         self._add_vehicle(vehicle, lead_vehicle, lane)
                         return True, lane
                 return False, lane
             else:
                 return False, lane
+
+    def _can_add_to_lane(self, lane, lead_vehicle, vehicle):
+        if self.lane_queues[lane]:
+            return False
+        if lead_vehicle:
+            current_gap = lead_vehicle.position - lead_vehicle.length
+            if current_gap >= Consts.MINIMUM_INJECTION_GAP:
+                return True
+            else:
+                return False
+        else:
+            return True
 
     def _add_vehicle(self, vehicle, lead_vehicle, lane):
         vehicle.set_lane(lane)
