@@ -239,7 +239,7 @@ class Garage(object):
         from matplotlib import rcParams
         rcParams['axes.titlepad'] = 40
 
-        f, axarr = plt.subplots(2, 3, squeeze=False)
+        f, axarr = plt.subplots(3, 2, squeeze=False)
 
         if self._generated_car_velocities:
             axarr[0, 0].hist(self._generated_car_velocities, density=True, ec="k")
@@ -258,9 +258,9 @@ class Garage(object):
             axarr[1, 1].set_xlabel('Desired Truck Minimum Gap (m)')
             axarr[1, 1].set_ylabel('Density')
         if self._generated_truck_weights:
-            axarr[1, 2].hist(self._generated_truck_weights, density=True, ec="k")
-            axarr[1, 2].set_xlabel('Truck Wights (m)')
-            axarr[1, 2].set_ylabel('Density')
+            axarr[2, 0].hist(self._generated_truck_weights, density=True, ec="k")
+            axarr[2, 0].set_xlabel('Truck Wights (m)')
+            axarr[2, 0].set_ylabel('Density')
 
         f.suptitle('Data from Vehicle Generation', fontsize=12, y=0.99)
         plt.subplots_adjust(top=0.85)

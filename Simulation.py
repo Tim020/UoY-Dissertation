@@ -39,6 +39,7 @@ Motivation needed to complete this project, go Charmander!
                             `" " -'
 '''
 
+import csv
 from decimal import *
 import json
 from multiprocessing import Process, Queue, Pipe
@@ -160,13 +161,14 @@ class Simulation(object):
                             frequency / Consts.TIME_STEP)
                 if self.last_t - t > 1:
                     self.last_t = t
+                    sys.stdout.write("\r\033[K")
                     sys.stdout.write("\rTime Remaining: {:.5f}s".format(t))
                     sys.stdout.flush()
 
             yield self.env.timeout(frequency)
 
 
-def simulation_process(queue, conn, configuration):
+def simulation_process(queue, conn, configuration, res, conf):
     print('Starting simulation with seed: {}'.format(Consts.SIMULATION_SEED))
     environment = simpy.RealtimeEnvironment(strict=False)
     finish_event = environment.event()
@@ -203,6 +205,20 @@ def simulation_process(queue, conn, configuration):
     print('\t[Garage] {} cars, {} trucks, {} truck platoons'.
           format(simulation.garage._cars, simulation.garage._trucks,
                  simulation.garage._truck_platoons))
+
+    res.append({
+        'configuration_file': conf,
+        'seed': Consts.SIMULATION_SEED,
+        'time': int(simulation.simulated_time),
+        'vehicles': simulation._vehicle_count,
+        'flow': simulation._vehicles_per_hour,
+        'cars': simulation.garage._cars,
+        'trucks': simulation.garage._trucks,
+        'truck_platoons': simulation.garage._truck_platoons,
+        'car_pct': Consts.CAR_PCT,
+        'truck_pct': Consts.TRUCK_PCT,
+        'platoon_pct': Consts.PLATOON_CHANCE
+    })
 
     print('Writing detector output...')
     simulation.bridge.write_detector_output()
@@ -252,7 +268,8 @@ if __name__ == '__main__':
                                                              conns[1],))
                 sim = Process(target=simulation_process, args=(vehicle_queue,
                                                                conns[0],
-                                                               config))
+                                                               config,
+                                                               results, conf))
 
                 processes.append(sim)
                 processes.append(disp)
@@ -264,17 +281,20 @@ if __name__ == '__main__':
                     process.join()
             else:
                 Consts.FORCE_DISPLAY_FREQ = False
-                simulation_process(None, None, config)
+                simulation_process(None, None, config, results, conf)
 
     if os.path.isdir('debug'):
         print('Removing old debug files\n')
         shutil.rmtree('debug')
 
     config = None
+    results = []
+    conf = None
 
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             if os.path.isfile(arg):
+                conf = arg
                 f = open(arg)
                 config = json.loads(f.read())
                 f.close()
@@ -287,3 +307,22 @@ if __name__ == '__main__':
                 continue
     else:
         run_simulation()
+
+    counter = 0
+    os.makedirs('output/global/', exist_ok=True)
+    while os.path.isfile('output/global/simulation_{}.csv'.format(counter)):
+        counter += 1
+    path = 'output/global/simulation_{}.csv'.format(counter)
+
+    _file = open(path, 'w')
+    csvwriter = csv.writer(_file)
+    count = 0
+    for d in results:
+        if count == 0:
+            header = d.keys()
+            csvwriter.writerow(header)
+            count += 1
+        csvwriter.writerow(d.values())
+    _file.close()
+
+    print('Written run results to: {}'.format(path))
