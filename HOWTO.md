@@ -18,3 +18,7 @@ To run without the display (much, much faster):
 
 Results and graphs are saved to the `output` directory, in a subdirectory of
 the seed used in the simulation
+
+Handy one liner to run multiple simulations at once, if all the configs are in `configs/DIR`:
+
+```ind configs/DIR -name "*.json" | sort --version-sort | HEADLESS=1 xargs ./Simulation.py```
