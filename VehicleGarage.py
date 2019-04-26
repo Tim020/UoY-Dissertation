@@ -197,9 +197,10 @@ class Garage(object):
             self._generated_car_gaps.append(gap)
         else:
             vel = float(self._truck_velocities.rvs(1)[0])
+            gap = float(self._truck_gaps.rvs(1)[0])
             if self._random.randint(0, 100) < self._platoon_pct:
                 new_vehicle = []
-                platoon_gap = self._platoon_gaps.randint(self._min_platoon_gap,
+                platoon_gap = self._platoon_gaps.uniform(self._min_platoon_gap,
                                                          self._max_platoon_gap)
                 platoon_length = self._platoon_lengths.randint(
                     self._min_platoon_length, self._max_platoon_length)
@@ -211,13 +212,12 @@ class Garage(object):
                         weight = float(self._truck_unloaded_weights.rvs(1)[0])
                     new_vehicle.append(
                         PlatoonedTruck(self._uuid_generator.uuid4(), vel,
-                                       0.73, 1.67, 2, self._truck_length,
+                                       0.73, 1.67, gap, self._truck_length,
                                        TruckPlatoon, weight, i == 0,
                                        platoon_gap))
                     self._trucks += 1
                 self._truck_platoons += 1
             else:
-                gap = float(self._truck_gaps.rvs(1)[0])
                 weight = float(self._truck_weights.rvs(1)[0])
                 new_vehicle = Truck(self._uuid_generator.uuid4(), vel, 0.73,
                                     1.67, gap, self._truck_length, IDM, weight)
