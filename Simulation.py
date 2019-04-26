@@ -202,6 +202,10 @@ def simulation_process(queue, conn, configuration, res, conf):
           format(simulation.bridge._calls, simulation.bridge._cars,
                  simulation.bridge._trucks, simulation._vehicle_failures))
 
+    pct_car = int(100 * (simulation.bridge._cars / (simulation.bridge._cars + simulation.bridge._trucks)))
+    pct_truck = int(100 * (simulation.bridge._trucks / (simulation.bridge._cars + simulation.bridge._trucks)))
+    print('\t[Bridge] {}% cars, {}% trucks'.format(pct_car, pct_truck))
+
     print('\t[Garage] {} cars, {} trucks, {} truck platoons'.
           format(simulation.garage._cars, simulation.garage._trucks,
                  simulation.garage._truck_platoons))
@@ -217,7 +221,10 @@ def simulation_process(queue, conn, configuration, res, conf):
         'truck_platoons': simulation.garage._truck_platoons,
         'car_pct': Consts.CAR_PCT,
         'truck_pct': Consts.TRUCK_PCT,
-        'platoon_pct': Consts.PLATOON_CHANCE
+        'actual_car_pct': pct_car,
+        'actual_truck_pct': pct_truck,
+        'platoon_pct': Consts.PLATOON_CHANCE,
+        'average_weight': simulation.bridge.bridge_detector.average_weight()
     })
 
     print('Writing detector output...')

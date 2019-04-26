@@ -232,6 +232,15 @@ class BridgeDetector(Detector):
     def get_name(self):
         return 'Bridge Detector'
 
+    def average_weight(self):
+        weights = []
+        for k in self.macroscopic_data:
+            weights.append(self.macroscopic_data[k]['weight_load'])
+        if weights:
+            return sum(weights) / len(weights)
+        else:
+            return 0
+
     def tick(self, time_step, simulated_time, vehicles):
         if self.next_macro_update <= time_step:
             weight_load = []
@@ -257,6 +266,36 @@ class BridgeDetector(Detector):
             'space_mean_velocity': 'Space Mean Velocity (m/s)',
             'weight_load': 'Weight Load (kg)'
         }
+
+    def plot(self):
+        super().plot()
+        os.makedirs(self.path, exist_ok=True)
+        import matplotlib.pyplot as plt
+        from matplotlib import rcParams
+        rcParams['axes.titlepad'] = 40
+
+        if not list(self.macroscopic_data.keys()):
+            return
+
+        f, axarr = plt.subplots(1)
+
+        timestamps = []
+        weights = []
+
+        for d in self.macroscopic_data:
+            timestamps.append(d)
+            weights.append(self.macroscopic_data[d]['weight_load'])
+
+        axarr.plot(timestamps, weights)
+        axarr.set_xlabel('Time (s)')
+        axarr.set_ylabel(self.get_plot_labels()['weight_load'])
+
+        f.suptitle('Weight Load Data from {}'.format(self.get_name()), fontsize=12, y=0.99)
+        plt.subplots_adjust(top=0.85)
+        plt.tight_layout()
+        f.set_size_inches(16, 9)
+        plt.savefig('{}/{}-Weight.png'.format(self.path, self.get_name()), dpi=300)
+        plt.close(f)
 
     def write_results(self):
         # JSON output
