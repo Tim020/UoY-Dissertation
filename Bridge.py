@@ -71,13 +71,13 @@ class Bridge(object):
                 else:
                     lane = self._random.randint(0, (self.lanes * 2) - 1)
             if self.lane_queues[lane]:
-                return False, lane
+                return False, lane, len(vehicle)
             else:
                 lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
                 if self._can_add_to_lane(lane, lead_vehicle, vehicle[0]):
                     self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
                     self.lane_queues[lane] = vehicle
-                    return True, lane
+                    return True, lane, len(vehicle)
                 elif Consts.MULTI_LANE and not force_lane:
                     # Could not add to this lane, so go through all lanes and
                     # find the first place we can add this new vehicle to
@@ -86,10 +86,10 @@ class Bridge(object):
                         if self._can_add_to_lane(lane, lead_vehicle, vehicle[0]):
                             self._add_vehicle(vehicle.pop(0), lead_vehicle, lane)
                             self.lane_queues[lane] = vehicle
-                            return True, lane
-                    return False, lane
+                            return True, lane, len(vehicle)
+                    return False, lane, len(vehicle)
                 else:
-                    return False, lane
+                    return False, lane, len(vehicle)
         else:
             if not Consts.MULTI_LANE:
                 lane = 0
@@ -101,7 +101,7 @@ class Bridge(object):
             lead_vehicle = self.vehicles[lane][-1] if self.vehicles[lane] else None
             if self._can_add_to_lane(lane, lead_vehicle, vehicle):
                 self._add_vehicle(vehicle, lead_vehicle, lane)
-                return True, lane
+                return True, lane, 1
             elif Consts.MULTI_LANE and not force_lane:
                 # Could not add to this lane, so go through all lanes and find
                 # the first place we can add this new vehicle to
@@ -110,10 +110,10 @@ class Bridge(object):
                         lane] else None
                     if self._can_add_to_lane(lane, lead_vehicle, vehicle):
                         self._add_vehicle(vehicle, lead_vehicle, lane)
-                        return True, lane
-                return False, lane
+                        return True, lane, 1
+                return False, lane, 1
             else:
-                return False, lane
+                return False, lane, 1
 
     def _can_add_to_lane(self, lane, lead_vehicle, vehicle):
         if self.lane_queues[lane]:

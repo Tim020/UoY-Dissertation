@@ -121,11 +121,11 @@ class Simulation(object):
                     lane, new_vehicle = self.queued_vehicles.pop(0)
                 else:
                     new_vehicle = self.garage.new_vehicle()
-                status, lane = self.bridge.add_vehicle(new_vehicle, lane)
+                status, lane, num_vehicles = self.bridge.add_vehicle(new_vehicle, lane)
                 if status:
-                    self._vehicle_count += 1
+                    self._vehicle_count += num_vehicles
                 else:
-                    self._vehicle_failures += 1
+                    self._vehicle_failures += num_vehicles
                     self.queued_vehicles.append((lane, new_vehicle))
                 self._next_vehicle_in = self._vehicle_timer
             else:
