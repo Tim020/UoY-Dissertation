@@ -70,12 +70,23 @@ class Simulation(object):
                                     Consts.SAFETIME_HEADWAY)
         if configuration:
             self.bridge.configure(configuration)
+
+        if Consts.PLATOON_ADJUSTMENT:
+            print('Adjusting car and truck percentage to account for platoons')
+            print('Config car percentage : {} | Config truck percentage: {}'.format(Consts.CAR_PCT, Consts.TRUCK_PCT))
+            avg_platoon_length = (Consts.MAX_PLATOON_LENGTH + Consts.MIN_PLATOON_LENGTH) / 2
+            car_pct, truck_pct = Simulation.adjust_truck_percentage(Consts.TRUCK_PCT, Consts.TRUCK_PCT, Consts.PLATOON_CHANCE, avg_platoon_length)
+            Consts.CAR_PCT = car_pct
+            Consts.TRUCK_PCT = truck_pct
+            print('Adjusted car percentage : {} | Adjusted truck percentage: {}'.format(car_pct, truck_pct))
+
         # self.bridge.add_safetime_headway_zone_all_lanes(245, 255, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
         # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
         # self.bridge.add_point_detector_all_lanes(150, 10)
         # self.bridge.add_space_detector_all_lanes(100, 200, 10)
         # self.bridge.add_space_detector_all_lanes(250, 450, 5)
+
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
                                            Consts.CAR_PCT, Consts.TRUCK_PCT,
@@ -110,6 +121,19 @@ class Simulation(object):
         self.last_freq = 0
         self.last_t = 0
         self.queued_vehicles = []
+
+    @staticmethod
+    def adjust_truck_percentage(orig_truck, truck_pct, plat_pct,
+                                plat_len):
+        num_trucks = truck_pct * ((100 - plat_pct) / 100)
+        num_plat = truck_pct * (plat_pct / 100) * plat_len
+        cars = 100 - truck_pct
+        if (num_trucks + num_plat) / (num_trucks + num_plat + cars) > (orig_truck / 100):
+            return Simulation.adjust_truck_percentage(orig_truck,
+                                                      truck_pct - 0.1,
+                                                      plat_pct, plat_len)
+        else:
+            return 100 - int(truck_pct), int(truck_pct)
 
     def update(self, frequency, time_step):
         self.last_t = (Consts.SIMULATION_LENGTH - self.simulated_time) * (frequency / Consts.TIME_STEP)
