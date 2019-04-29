@@ -78,7 +78,7 @@ class IDM(DriverModel):
                          IDM.calc_position(vehicle) -
                          vehicle.lead_vehicle.length)
         else:
-            return float(Consts.BRIDGE_LENGTH + 100)
+            return float(Consts.ROAD_LENGTH + 100)
 
 
 class TruckPlatoon(DriverModel):
@@ -111,4 +111,4 @@ class TruckPlatoon(DriverModel):
                          TruckPlatoon.calc_position(vehicle) -
                          vehicle.lead_vehicle.length)
         else:
-            return float(Consts.BRIDGE_LENGTH + 100)
+            return float(Consts.ROAD_LENGTH + 100)

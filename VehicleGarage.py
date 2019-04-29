@@ -53,14 +53,14 @@ class Garage(object):
         if Consts.DEBUG_MODE:
             self._debug_file = open('debug/garage.txt', 'w')
 
-        path = 'output/{}{}'
-        if os.path.isdir(path.format(self._seed, '')):
+        path = 'output/{}/{}{}'
+        if os.path.isdir(path.format(Consts.BASE_OUTPUT_DIR, self._seed, '')):
             counter = 0
-            while os.path.isdir(path.format(self._seed, ':{}'.format(counter))):
+            while os.path.isdir(path.format(Consts.BASE_OUTPUT_DIR, self._seed, ':{}'.format(counter))):
                 counter += 1
-            self.path = path.format(self._seed, ':{}'.format(counter))
+            self.path = path.format(Consts.BASE_OUTPUT_DIR, self._seed, ':{}'.format(counter))
         else:
-            self.path = path.format(self._seed, '')
+            self.path = path.format(Consts.BASE_OUTPUT_DIR, self._seed, '')
             
     def configure_car_velocities(self, car_speed, car_speed_variance, car_speed_dist):
         car_min_speed = (1 - (car_speed_variance / 100))

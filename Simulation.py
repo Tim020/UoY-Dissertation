@@ -49,7 +49,7 @@ import simpy
 import sys
 import time
 
-import Bridge
+import Road
 import Consts
 import Display
 import VehicleGarage
@@ -64,12 +64,12 @@ class Simulation(object):
         self.simulated_time = 0
         self.action = env.process(self.update(Consts.SIMULATION_FREQUENCY,
                                               Consts.TIME_STEP))
-        self.bridge = Bridge.Bridge(Consts.SIMULATION_SEED,
-                                    Consts.BRIDGE_LENGTH,
-                                    Consts.BRIDGE_LANES,
-                                    Consts.SAFETIME_HEADWAY)
+        self.road = Road.Road(Consts.SIMULATION_SEED,
+                              Consts.ROAD_LENGTH,
+                              Consts.BRIDGE_LANES,
+                              Consts.SAFETIME_HEADWAY)
         if configuration:
-            self.bridge.configure(configuration)
+            self.road.configure(configuration)
 
         if Consts.PLATOON_ADJUSTMENT:
             print('Adjusting car and truck percentage to account for platoons')
@@ -80,12 +80,12 @@ class Simulation(object):
             Consts.TRUCK_PCT = truck_pct
             print('Adjusted car percentage : {} | Adjusted truck percentage: {}'.format(car_pct, truck_pct))
 
-        # self.bridge.add_safetime_headway_zone_all_lanes(245, 255, 10)
-        # self.bridge.add_speed_limited_zone_all_lanes(250, 450, 10)
-        # self.bridge.add_speed_limited_zone_all_lanes(75, 125, 10)
-        # self.bridge.add_point_detector_all_lanes(150, 10)
-        # self.bridge.add_space_detector_all_lanes(100, 200, 10)
-        # self.bridge.add_space_detector_all_lanes(250, 450, 5)
+        # self.road.add_safetime_headway_zone_all_lanes(245, 255, 10)
+        # self.road.add_speed_limited_zone_all_lanes(250, 450, 10)
+        # self.road.add_speed_limited_zone_all_lanes(75, 125, 10)
+        # self.road.add_point_detector_all_lanes(150, 10)
+        # self.road.add_space_detector_all_lanes(100, 200, 10)
+        # self.road.add_space_detector_all_lanes(250, 450, 5)
 
         self.garage = VehicleGarage.Garage(Consts.SIMULATION_SEED,
                                            Consts.SIMULATION_SHORT_SEED,
@@ -145,7 +145,7 @@ class Simulation(object):
                     lane, new_vehicle = self.queued_vehicles.pop(0)
                 else:
                     new_vehicle = self.garage.new_vehicle()
-                status, lane, num_vehicles = self.bridge.add_vehicle(new_vehicle, lane)
+                status, lane, num_vehicles = self.road.add_vehicle(new_vehicle, lane)
                 if status:
                     self._vehicle_count += num_vehicles
                 else:
@@ -159,7 +159,7 @@ class Simulation(object):
 
             self._vehicles_per_hour = int((self._vehicle_count / Decimal(self.simulated_time)) * 3600)
 
-            self.bridge.update(time_step, self.simulated_time, self.queue)
+            self.road.update(time_step, self.simulated_time, self.queue)
 
             if self.simulated_time >= Consts.SIMULATION_LENGTH:
                 self.finish_event.succeed()
@@ -223,11 +223,11 @@ def simulation_process(queue, conn, configuration, res, conf):
                  simulation._vehicles_per_hour))
 
     print('\t[Bridge] {} calls, {} cars, {} trucks, {} inflow failures'.
-          format(simulation.bridge._calls, simulation.bridge._cars,
-                 simulation.bridge._trucks, simulation._vehicle_failures))
+          format(simulation.road._calls, simulation.road._cars,
+                 simulation.road._trucks, simulation._vehicle_failures))
 
-    pct_car = int(100 * (simulation.bridge._cars / (simulation.bridge._cars + simulation.bridge._trucks)))
-    pct_truck = int(100 * (simulation.bridge._trucks / (simulation.bridge._cars + simulation.bridge._trucks)))
+    pct_car = int(100 * (simulation.road._cars / (simulation.road._cars + simulation.road._trucks)))
+    pct_truck = int(100 * (simulation.road._trucks / (simulation.road._cars + simulation.road._trucks)))
     print('\t[Bridge] {}% cars, {}% trucks'.format(pct_car, pct_truck))
 
     print('\t[Garage] {} cars, {} trucks, {} truck platoons'.
@@ -248,20 +248,22 @@ def simulation_process(queue, conn, configuration, res, conf):
         'actual_car_pct': pct_car,
         'actual_truck_pct': pct_truck,
         'platoon_pct': Consts.PLATOON_CHANCE,
-        'average_weight': simulation.bridge.bridge_detector.average_weight()
+        'average_weight': simulation.road.road_detector.average_weight()
     })
 
     print('Writing detector output...')
-    simulation.bridge.write_detector_output()
+    simulation.road.write_detector_output()
     print('Rendering detector graphs...')
-    simulation.bridge.plot_detector_output()
+    simulation.road.plot_detector_output()
     print('Rendering vehicle garage graphs...')
     simulation.garage.plot()
-    print('Finished generating output files')
+    print('Creating copy of the configuration file...')
+    shutil.copy(conf, 'output/{}/{}'.format(Consts.BASE_OUTPUT_DIR, Consts.SIMULATION_SEED))
+    print('Finished generating output to "output/{}/{}"'.format(Consts.BASE_OUTPUT_DIR, Consts.SIMULATION_SEED))
 
 
 def display_process(queue, conn):
-    display = Display.Display(1600, 900, Consts.BRIDGE_LENGTH,
+    display = Display.Display(1600, 900, Consts.ROAD_LENGTH,
                               Consts.BRIDGE_LANES)
     running = True
     start = time.time()
@@ -323,27 +325,31 @@ if __name__ == '__main__':
     conf = None
 
     if len(sys.argv) > 1:
-        for arg in sys.argv[1:]:
-            if os.path.isfile(arg):
-                conf = arg
-                f = open(arg)
-                config = json.loads(f.read())
-                f.close()
-                print('\nStarting simulation with config: {}'.format(arg))
-                Consts.load_from_json(config)
-                run_simulation()
+        Consts.BASE_OUTPUT_DIR = sys.argv[1]
+        if len(sys.argv) >= 2:
+            for arg in sys.argv[2:]:
+                if os.path.isfile(arg):
+                    conf = arg
+                    f = open(arg)
+                    config = json.loads(f.read())
+                    f.close()
+                    print('\nStarting simulation with config: {}'.format(arg))
+                    Consts.load_from_json(config)
+                    run_simulation()
+                else:
+                    print('Argument was not a file. Not sure what to do here, '
+                          'so skipping argument: {}!'.format(arg))
+                    continue
             else:
-                print('Argument was not a file. Not sure what to do here, '
-                      'so skipping argument: {}!'.format(arg))
-                continue
+                run_simulation()
     else:
         run_simulation()
 
     counter = 0
-    os.makedirs('output/global/', exist_ok=True)
-    while os.path.isfile('output/global/simulation_{}.csv'.format(counter)):
+    os.makedirs('output/global/{}/'.format(Consts.BASE_OUTPUT_DIR), exist_ok=True)
+    while os.path.isfile('output/global/{}/simulation_{}.csv'.format(Consts.BASE_OUTPUT_DIR, counter)):
         counter += 1
-    path = 'output/global/simulation_{}.csv'.format(counter)
+    path = 'output/global/{}/simulation_{}.csv'.format(Consts.BASE_OUTPUT_DIR, counter)
 
     _file = open(path, 'w')
     csvwriter = csv.writer(_file)

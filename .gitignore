@@ -4,3 +4,5 @@ debug/*
 replays/*
 output/*
 configs/*
+GraphStyle.m
+overnight.sh

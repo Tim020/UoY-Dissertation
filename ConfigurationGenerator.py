@@ -29,13 +29,18 @@ def get_params():
             'itemtype': float,
             'help': 'How much time passes in each simulation update'
         },
-        'Bridge Length': {
+        'Road Length': {
             'itemtype': int,
-            'help': 'Length of the bridge to simulate (m)'
+            'help': 'Length of the road to simulate (m)'
+        },
+        'Road Detector Aggregation Interval': {
+            'itemtype': int,
+            'help': 'Aggregation interval for the road detector (s)',
+            'validation': 'answer > 0 and answer <= simulation_params["Simulation Length"]'
         },
         'Safetime Headway': {
             'itemtype': float,
-            'help': 'Default safetime headway for the bridge'
+            'help': 'Default safetime headway for the road'
         },
         'Multi Lane Traffic': {
             'itemtype': bool,

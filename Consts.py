@@ -46,13 +46,13 @@ TRUCK_GAP_VARIANCE = 10
 CAR_GAP_DISTRIBUTION = 0
 TRUCK_GAP_DISTRIBUTION = 0
 
-# Length of the bridge for the simulation
-BRIDGE_LENGTH = 1000
+# Length of the road for the simulation
+ROAD_LENGTH = 1000
 # Whether to simulate only a single lane of traffic (False), or bi-directional traffic (True)
 MULTI_LANE = True
 # Number of lanes of traffic per direction in bi-directional simulation
 BRIDGE_LANES = 1
-# Default safetime headway for the bridge
+# Default safetime headway for the road
 SAFETIME_HEADWAY = 1
 
 # Number of vehicles per per hour injected into the system (per lane)
@@ -89,6 +89,9 @@ MAX_PLATOON_GAP = 5
 MINIMUM_INJECTION_GAP = 15
 PLATOON_ADJUSTMENT = True
 
+BASE_OUTPUT_DIR = None
+ROAD_DETECTOR_INTERVAL = 30
+
 
 def configure_random():
     global _random
@@ -117,7 +120,8 @@ def load_from_json(conf):
         'Simulation Length': 'SIMULATION_LENGTH',
         'Simulation Time Step': 'TIME_STEP',
         'Minimum Injection Gap': 'MINIMUM_INJECTION_GAP',
-        'Bridge Length': 'BRIDGE_LENGTH',
+        'Road Length': 'ROAD_LENGTH',
+        'Road Detector Aggregation Interval': 'ROAD_DETECTOR_INTERVAL',
         'Safetime Headway': 'SAFETIME_HEADWAY',
         'Multi Lane Traffic': 'MULTI_LANE',
         'Number of Lanes': 'BRIDGE_LANES',

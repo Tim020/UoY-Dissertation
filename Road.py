@@ -2,7 +2,7 @@ import os
 import random
 
 import Consts
-from Detectors import PointDetector, SpaceDetector, BridgeDetector
+from Detectors import PointDetector, SpaceDetector, RoadDetector
 import Vehicle
 
 
@@ -28,7 +28,7 @@ class SpeedLimitedZone(object):
         self.speed = speed
 
 
-class Bridge(object):
+class Road(object):
     def __init__(self, seed, length, lanes, safetime_headway):
         self.length = length
         self.lanes = lanes
@@ -51,12 +51,12 @@ class Bridge(object):
         self._cars = 0
         self._trucks = 0
         if Consts.DEBUG_MODE:
-            os.makedirs('debug/bridge', exist_ok=True)
-            self._lane_files = [open('debug/bridge/lane_{}.txt'.format(lane),
+            os.makedirs('debug/road', exist_ok=True)
+            self._lane_files = [open('debug/road/lane_{}.txt'.format(lane),
                                      'w') for lane in range(self.lanes * 2)]
         os.makedirs('replays', exist_ok=True)
         self._replay_file = open('replays/replay-{}.sim'.format(seed), 'w')
-        self.bridge_detector = BridgeDetector(60)
+        self.road_detector = RoadDetector(Consts.ROAD_DETECTOR_INTERVAL)
 
     # New vehicles #
 
@@ -358,7 +358,7 @@ class Bridge(object):
                     self._add_platooned_truck(self.lane_queues[i].pop(0), lead,
                                               i)
 
-        # Step 4: Remove any vehicle at the end of the bridge
+        # Step 4: Remove any vehicle at the end of the road
         vehicles_to_remove = [[] for _ in range(self.lanes * 2)]
         for i, lane in enumerate(self.vehicles):
             for vehicle in lane:
@@ -390,9 +390,9 @@ class Bridge(object):
             for detector in lane:
                 detector.tick(time_step, simulated_time, self.vehicles[i])
 
-        # Step 8: Update bridge detector
-        self.bridge_detector.tick(time_step, simulated_time,
-                                  flatten(self.vehicles))
+        # Step 8: Update road detector
+        self.road_detector.tick(time_step, simulated_time,
+                                flatten(self.vehicles))
 
         if queue:
             queue.put(vehicle_data)
@@ -407,7 +407,7 @@ class Bridge(object):
         for lane in self.space_detectors:
             for detector in lane:
                 detector.write_results()
-        self.bridge_detector.write_results()
+        self.road_detector.write_results()
 
     def plot_detector_output(self):
         for lane in self.point_detectors:
@@ -416,4 +416,4 @@ class Bridge(object):
         for lane in self.space_detectors:
             for detector in lane:
                 detector.plot()
-        self.bridge_detector.plot()
+        self.road_detector.plot()

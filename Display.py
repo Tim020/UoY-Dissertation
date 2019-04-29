@@ -11,12 +11,12 @@ with contextlib.redirect_stdout(None):
 
 class Display(object):
 
-    def __init__(self, W, H, bridge_length, bridge_lanes):
+    def __init__(self, W, H, road_length, num_lanes):
         pygame.init()
 
-        self.bridge_length = bridge_length
-        self.bridge_lanes = bridge_lanes
-        self.bridge_tile_length = 16
+        self.road_length = road_length
+        self.road_lanes = num_lanes
+        self.road_tile_length = 16
 
         base_path = os.path.abspath(os.path.dirname(__file__))
         self.road = pygame.image.load(os.path.join(base_path, 'resources', "road.png"))
@@ -43,7 +43,7 @@ class Display(object):
         self.truck_platoon = pygame.transform.scale(self.truck_platoon, (int(self.truck_platoon.get_size()[0] >> 1), int(self.truck_platoon.get_size()[1] >> 1)))
 
         disp_info = pygame.display.Info()
-        desired_width = max(W, math.ceil(bridge_length / self.bridge_tile_length) * self.road.get_size()[0])
+        desired_width = max(W, math.ceil(road_length / self.road_tile_length) * self.road.get_size()[0])
         scale_factor = 1
         if desired_width > disp_info.current_w:
             scale_factor = math.ceil(desired_width / disp_info.current_w)
@@ -57,12 +57,12 @@ class Display(object):
         self.truck = pygame.transform.scale(self.truck, (int(self.truck.get_size()[0] / scale_factor), int(self.truck.get_size()[1] / scale_factor)))
         self.truck_platoon = pygame.transform.scale(self.truck_platoon, (int(self.truck_platoon.get_size()[0] / scale_factor), int(self.truck_platoon.get_size()[1] / scale_factor)))
 
-        W = math.ceil(bridge_length / self.bridge_tile_length) * self.road.get_size()[0]
-        H = (self.bridge_lanes * self.road.get_size()[1]) + 20
-        self.bridge_pixels = math.ceil(bridge_length / self.bridge_tile_length) * self.road.get_size()[0]
+        W = math.ceil(road_length / self.road_tile_length) * self.road.get_size()[0]
+        H = (self.road_lanes * self.road.get_size()[1]) + 20
+        self.road_pixels = math.ceil(road_length / self.road_tile_length) * self.road.get_size()[0]
 
         self.lane_positions = []
-        for lane_num in range(self.bridge_lanes):
+        for lane_num in range(self.road_lanes):
             self.lane_positions.append(int(10 + (lane_num * self.road.get_size()[1]) + (self.road.get_size()[1] / 4)))
             self.lane_positions.append(int(10 + (lane_num * self.road.get_size()[1]) + self.road.get_size()[1] - (self.road.get_size()[1] / 4)))
 
@@ -77,17 +77,17 @@ class Display(object):
         self.truck_platoon = self.truck_platoon.convert_alpha()
 
         self.background = pygame.Surface((W + 20, H))
-        self.road_surface = pygame.Surface((W + 20, self.bridge_lanes * self.road.get_size()[1]))
+        self.road_surface = pygame.Surface((W + 20, self.road_lanes * self.road.get_size()[1]))
         self.background.fill((0, 128, 0))
-        for lane_num in range(self.bridge_lanes):
-            for tile_num in range(math.ceil(self.bridge_length / self.bridge_tile_length) + 2):
-                if self.bridge_lanes == 1:
+        for lane_num in range(self.road_lanes):
+            for tile_num in range(math.ceil(self.road_length / self.road_tile_length) + 2):
+                if self.road_lanes == 1:
                     self.background.blit(self.road_single, (10 + ((tile_num - 1) * self.road_single.get_size()[0]), (lane_num * self.road_single.get_size()[1]) + 10))
                     self.road_surface.blit(self.road_single, (10 + ((tile_num - 1) * self.road_single.get_size()[0]), (lane_num * self.road_single.get_size()[1])))
                 elif lane_num == 0:
                     self.background.blit(self.road_top, (10 + ((tile_num - 1) * self.road_top.get_size()[0]), (lane_num * self.road_top.get_size()[1]) + 10))
                     self.road_surface.blit(self.road_top, (10 + ((tile_num - 1) * self.road_top.get_size()[0]), (lane_num * self.road_top.get_size()[1])))
-                elif lane_num == self.bridge_lanes - 1:
+                elif lane_num == self.road_lanes - 1:
                     self.background.blit(self.road_bottom, (10 + ((tile_num - 1) * self.road_bottom.get_size()[0]), (lane_num * self.road_bottom.get_size()[1]) + 10))
                     self.road_surface.blit(self.road_bottom, (10 + ((tile_num - 1) * self.road_bottom.get_size()[0]), (lane_num * self.road_bottom.get_size()[1])))
                 else:
@@ -116,11 +116,11 @@ class Display(object):
         for i, lane in enumerate(vehicle_data):
             for vehicle in lane:
                 v_keys.append(vehicle[2])
-                l = i if i < self.bridge_lanes else (i * -1) + (self.bridge_lanes - 1)
+                l = i if i < self.road_lanes else (i * -1) + (self.road_lanes - 1)
                 if l >= 0:
-                    x_position = int((vehicle[1] / self.bridge_length) * self.bridge_pixels) + 10
+                    x_position = int((vehicle[1] / self.road_length) * self.road_pixels) + 10
                 else:
-                    x_position = int(((self.bridge_length - vehicle[1]) / self.bridge_length) * self.bridge_pixels) - 10
+                    x_position = int(((self.road_length - vehicle[1]) / self.road_length) * self.road_pixels) - 10
                 if vehicle[0] == 'Car':
                     if l >= 0:
                         sprite = self.car

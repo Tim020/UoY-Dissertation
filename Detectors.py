@@ -1,7 +1,6 @@
 from collections import defaultdict
 import csv
 import json
-import math
 import os
 
 import Consts
@@ -15,15 +14,21 @@ class Detector(object):
         self.microscopic_data = defaultdict(dict)
         self.macroscopic_data = defaultdict(dict)
 
-        path = 'output/{}{}/detectors/{}'
+        path = 'output/{}/{}{}/detectors/{}'
 
-        if os.path.isdir(path.format(Consts.SIMULATION_SEED, '', self.lane)):
+        if os.path.isdir(path.format(Consts.BASE_OUTPUT_DIR,
+                                     Consts.SIMULATION_SEED, '', self.lane)):
             counter = 0
-            while os.path.isdir(path.format(Consts.SIMULATION_SEED, ':{}'.format(counter), self.lane)):
+            while os.path.isdir(path.format(Consts.BASE_OUTPUT_DIR,
+                                            Consts.SIMULATION_SEED,
+                                            ':{}'.format(counter), self.lane)):
                 counter += 1
-            self.path = path.format(Consts.SIMULATION_SEED, ':{}'.format(counter), self.lane)
+            self.path = path.format(Consts.BASE_OUTPUT_DIR,
+                                    Consts.SIMULATION_SEED,
+                                    ':{}'.format(counter), self.lane)
         else:
-            self.path = path.format(Consts.SIMULATION_SEED, '', self.lane)
+            self.path = path.format(Consts.BASE_OUTPUT_DIR,
+                                    Consts.SIMULATION_SEED, '', self.lane)
 
     def get_name(self):
         raise NotImplementedError
@@ -70,10 +75,6 @@ class Detector(object):
             return
 
         k = list(self.macroscopic_data.keys())[0]
-        data_keys = list(self.macroscopic_data[k].keys())
-        f, axarr = plt.subplots(math.ceil(len(data_keys) / 2),
-                                math.ceil(len(data_keys) / 2), squeeze=False)
-
         timestamps = []
         data_points = defaultdict(list)
 
@@ -82,26 +83,21 @@ class Detector(object):
             for key in self.macroscopic_data[d]:
                 data_points[key].append(self.macroscopic_data[d][key])
 
-        count = 0
-        for plot in sorted(data_points):
-            axarr[count % 2, count // 2].plot(timestamps, data_points[plot])
-            axarr[count % 2, count // 2].set_xlabel('Time (s)')
-            axarr[count % 2, count // 2].set_ylabel(self.get_plot_labels()[plot])
-            axarr[count % 2, count // 2].grid(False)
-            count += 1
+        for plot in data_points:
+            f, axarr = plt.subplots(1)
 
-        if count != math.pow(math.ceil(len(data_keys) / 2), 2):
-            for x in range(math.ceil(len(data_keys) / 2)):
-                for y in range(math.ceil(len(data_keys) / 2)):
-                    if (x + (y * math.ceil(len(data_keys) / 2))) >= count:
-                        axarr[y, x].axis('off')
+            axarr.plot(timestamps, data_points[plot])
+            axarr.set_xlabel('Time (s)')
+            axarr.set_ylabel(self.get_plot_labels()[plot])
+            axarr.grid(False)
 
-        f.suptitle('Data from {}'.format(self.get_name()), fontsize=12, y=0.99)
-        plt.subplots_adjust(top=0.85)
-        plt.tight_layout()
-        f.set_size_inches(16, 9)
-        plt.savefig('{}/{}.png'.format(self.path, self.get_name()), dpi=300)
-        plt.close(f)
+            plt.subplots_adjust(top=0.85)
+            plt.tight_layout()
+            f.set_size_inches(16, 9)
+            plt.rcParams.update({'font.size': 16})
+            plt.savefig('{}/{}-{}.png'.format(self.path, self.get_name(), plot),
+                        dpi=300, bbox_inches='tight', pad_inches=0.15)
+            plt.close(f)
 
 
 def calc_harmonic_mean(data):
@@ -184,9 +180,8 @@ class SpaceDetector(Detector):
                 gaps = vehicle_data['space_headway']
 
                 self.microscopic_data[vehicle._id] = {
-                    'average_time_mean_velocity': ((sum(velocities) / len(velocities))
-                                                   if velocities else 0),
-                    'average_space_mean_velocity': calc_harmonic_mean(velocities),
+                    'space_mean_velocity': ((sum(velocities) / len(velocities))
+                                            if velocities else 0),
                     'average_space_headway': ((sum(gaps) / len(gaps))
                                               if gaps else 0)
                 }
@@ -204,9 +199,8 @@ class SpaceDetector(Detector):
             assert(num_vehicles == len(self.in_progress_vehicles))
 
             self.macroscopic_data[simulated_time] = {
-                'time_mean_velocity': ((sum(velocities) / len(velocities))
+                'space_mean_velocity': ((sum(velocities) / len(velocities))
                                        if velocities else 0),
-                'space_mean_velocity': calc_harmonic_mean(velocities),
                 'density': ((len(self.in_progress_vehicles) / ((self.end - self.start) / 1000))
                             if self.in_progress_vehicles else 0),
                 'weight_load': sum(weights)
@@ -218,16 +212,15 @@ class SpaceDetector(Detector):
 
     def get_plot_labels(self):
         return {
-            'time_mean_velocity': 'Time Mean Velocity (m/s)',
             'space_mean_velocity': 'Space Mean Velocity (m/s)',
             'density': 'Flow (veh/km)',
             'weight_load': 'Weight Load (kg)'
         }
 
 
-class BridgeDetector(Detector):
+class RoadDetector(Detector):
     def __init__(self, time_interval):
-        super().__init__('bridge', time_interval)
+        super().__init__('road', time_interval)
 
     def get_name(self):
         return 'Bridge Detector'
@@ -250,9 +243,8 @@ class BridgeDetector(Detector):
                 velocities.append(vehicle.velocity)
 
             self.macroscopic_data[simulated_time] = {
-                'time_mean_velocity': ((sum(velocities) / len(velocities))
+                'space_mean_velocity': ((sum(velocities) / len(velocities))
                                        if velocities else 0),
-                'space_mean_velocity': calc_harmonic_mean(velocities),
                 'weight_load': sum(weight_load)
             }
 
@@ -262,40 +254,9 @@ class BridgeDetector(Detector):
 
     def get_plot_labels(self):
         return {
-            'time_mean_velocity': 'Time Mean Velocity (m/s)',
             'space_mean_velocity': 'Space Mean Velocity (m/s)',
             'weight_load': 'Weight Load (kg)'
         }
-
-    def plot(self):
-        super().plot()
-        os.makedirs(self.path, exist_ok=True)
-        import matplotlib.pyplot as plt
-        from matplotlib import rcParams
-        rcParams['axes.titlepad'] = 40
-
-        if not list(self.macroscopic_data.keys()):
-            return
-
-        f, axarr = plt.subplots(1)
-
-        timestamps = []
-        weights = []
-
-        for d in self.macroscopic_data:
-            timestamps.append(d)
-            weights.append(self.macroscopic_data[d]['weight_load'])
-
-        axarr.plot(timestamps, weights)
-        axarr.set_xlabel('Time (s)')
-        axarr.set_ylabel(self.get_plot_labels()['weight_load'])
-
-        f.suptitle('Weight Load Data from {}'.format(self.get_name()), fontsize=12, y=0.99)
-        plt.subplots_adjust(top=0.85)
-        plt.tight_layout()
-        f.set_size_inches(16, 9)
-        plt.savefig('{}/{}-Weight.png'.format(self.path, self.get_name()), dpi=300)
-        plt.close(f)
 
     def write_results(self):
         # JSON output

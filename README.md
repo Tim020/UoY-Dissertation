@@ -7,10 +7,10 @@ TODO:
 DONE:
 * fix vehicle uuid seeding
 * user setting of vehicle speed variance
-* speed limited sections of the bridge
-* variable safetime headway sections of the bridge
-* bridge sensors
-* some sort of display for the simulation (let's draw a bridge)
+* speed limited sections of the road
+* variable safetime headway sections of the road
+* road sensors
+* some sort of display for the simulation (let's draw a road)
 * speed up rendering by not continually drawing background
 * force simulation speed to be bound to display update speed (optionally)
 * truck platooning

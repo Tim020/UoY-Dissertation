@@ -16,7 +16,7 @@ class Vehicle(object):
         # Other parameters
         self._id = _id
         self._label = 'Base'
-        self._bridge = None
+        self._road = None
         self.model = model
         self.weight = weight
 
@@ -78,15 +78,15 @@ class Vehicle(object):
         self.lead_vehicle = vehicle
         self.gap = self.model.calc_gap(self)
 
-    def add_to_road(self, bridge, lead_vehicle):
-        self._bridge = bridge
+    def add_to_road(self, road, lead_vehicle):
+        self._road = road
         self.lead_vehicle = lead_vehicle
         if lead_vehicle:
             self.gap = self.lead_vehicle.position - self.lead_vehicle.length
             self.velocity = min(self.get_desired_velocity(),
                                 (self.gap / self.get_safetime_headway()))
         else:
-            self.gap = Consts.BRIDGE_LENGTH + 100
+            self.gap = Consts.ROAD_LENGTH + 100
             self.velocity = self.desired_velocity
         if Consts.DEBUG_MODE:
             os.makedirs('debug/lane_{}'.format(self.lane), exist_ok=True)
@@ -97,11 +97,11 @@ class Vehicle(object):
         self.lane = lane
 
     def get_safetime_headway(self):
-        return self._bridge.get_safetime_headway(self.lane, self.position)
+        return self._road.get_safetime_headway(self.lane, self.position)
 
     def get_desired_velocity(self):
-        bridge_limit = self._bridge.get_speed_limit(self.lane, self.position)
-        return min(bridge_limit, self.desired_velocity) if bridge_limit else self.desired_velocity
+        road_limit = self._road.get_speed_limit(self.lane, self.position)
+        return min(road_limit, self.desired_velocity) if road_limit else self.desired_velocity
 
     def finalise(self):
         if Consts.DEBUG_MODE:
