@@ -1,22 +1,24 @@
-TODO:
-* multi-lane behaviour?
-* replay capability for display - play back old simulations
-* uniform/normal/bimodal distribution for truck weights
-* multiple configuration files set as args for the simulation
+Requires Python 3 to run.
 
-DONE:
-* fix vehicle uuid seeding
-* user setting of vehicle speed variance
-* speed limited sections of the road
-* variable safetime headway sections of the road
-* road sensors
-* some sort of display for the simulation (let's draw a road)
-* speed up rendering by not continually drawing background
-* force simulation speed to be bound to display update speed (optionally)
-* truck platooning
-* handle the possibility of the simulation crashing due to being too slow
-* variable platoon lengths
-* variable platoon separation distances
-* normal & uniform distributions of velocity and minimum jam distance
-* variable vehicle lengths - set by user
-* some sort of UI for parameter configuration - CLI
+First step is to install the necessary package requirements using:
+
+```pip3 install requirements.txt```
+
+Next, generate a configuration file to use for the simulation:
+
+```./ConfigurationGenerator.py```
+
+Finally, pass this file into the simulator to run it, `NAME` is the name to use for the subfolder in output:
+
+```./Simulation.py "NAME" configs/CONFIG.json```
+
+To run without the display (much, much faster), `NAME` is the name to use for the subfolder in output:
+
+```HEADLESS=1 ./Simulation.py "NAME" configs/CONFIG.json```
+
+Results and graphs are saved to the `output` directory, in a subdirectory of
+the seed used in the simulation
+
+Handy one liner to run multiple simulations at once, if all the configs are in `configs/DIR`, `NAME` is the name to use for the subfolder in output:
+
+```ind configs/DIR -name "*.json" | sort --version-sort | HEADLESS=1 xargs ./Simulation.py "NAME"```
