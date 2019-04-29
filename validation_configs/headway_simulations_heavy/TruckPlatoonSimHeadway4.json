@@ -1,0 +1,77 @@
+{
+    "Bridge Length": 1000,
+    "Car Length": 4,
+    "Car Minimum Gap": 2,
+    "Car Minimum Gap Variance": 0,
+    "Car Percentage": 80,
+    "Car Speed Distribution": 0,
+    "Car Speed Variance": 20,
+    "Car v0": 33,
+    "Inflow Rate": 2000,
+    "Maximum Platoon Gap": 1,
+    "Maximum Platoon Length": 5,
+    "Minimum Platoon Gap":1,
+    "Minimum Platoon Length": 5,
+    "Multi Lane Traffic": false,
+    "Number of Runs": 1,
+    "Platoon Percentage": 30,
+    "Safetime Headway": 1.6,
+    "Seed": 275992053216840883315296079762438811554,
+    "Short Seed": 3221332009,
+    "Simulation Length": 14400,
+    "Simulation Time Step": 0.1,
+    "Simulation Update Frequency": 0.0005,
+    "Truck Length": 12,
+    "Truck Loaded Weight": 44000,
+    "Truck Loaded Weight Variance": 10,
+    "Truck Minimum Gap": 2,
+    "Truck Minimum Gap Variance": 0,
+    "Truck Percentage": 20,
+    "Truck Speed Distribution": 0,
+    "Truck Speed Variance": 10,
+    "Truck Unloaded Weight": 44000,
+    "Truck Unloaded Weight Variance": 10,
+    "Truck v0": 22,
+    "detectors": [
+        {
+            "interval": 120,
+            "lane": 0,
+            "position": 400,
+            "type": "point"
+        },
+        {
+            "interval": 120,
+            "lane": 0,
+            "position": 450,
+            "type": "point"
+        },
+        {
+            "interval": 120,
+            "lane": 0,
+            "position": 750,
+            "type": "point"
+        },
+        {
+            "interval": 120,
+            "lane": 0,
+            "position": 800,
+            "type": "point"
+        },
+        {
+            "interval": 60,
+            "lane": 0,
+            "position_end": 750,
+            "position_start": 450,
+            "type": "space"
+        }
+    ],
+    "headways": [
+        {
+            "headway": 4,
+            "lane": 0,
+            "position_end": 750,
+            "position_start": 450
+        }
+    ],
+    "speedlimits": []
+}
